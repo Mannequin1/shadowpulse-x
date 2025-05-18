@@ -14,20 +14,22 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      overflow: hidden;
+      transition: background 0.3s;
     }
 
     .terminal {
       background: #000000;
       padding: 30px;
       border-radius: 8px;
-      box-shadow: 0 0 20px #00ffcc33;
+      box-shadow: 0 0 30px #00ffcc55;
       width: 90%;
-      max-width: 600px;
+      max-width: 650px;
     }
 
     #output {
       white-space: pre-wrap;
-      min-height: 200px;
+      min-height: 250px;
       margin-bottom: 10px;
     }
 
@@ -42,30 +44,98 @@
       font-size: 16px;
       outline: none;
     }
+
+    .glitch-flicker {
+      animation: flicker 0.2s infinite alternate;
+    }
+
+    @keyframes flicker {
+      from { background-color: #0a0a0a; }
+      to { background-color: #111111; }
+    }
+
+    .aura {
+      box-shadow: 0 0 20px #00ffcc44, 0 0 60px #00ffcc22;
+    }
+
+    .static {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif') center center / cover;
+      z-index: 999;
+      opacity: 0.07;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
-  <div class="terminal">
+  <div class="static" id="staticNoise" style="display: none;"></div>
+
+  <div class="terminal aura">
     <div id="output">ShadowPulse X Interface\nType /help to begin...</div>
     <input type="text" id="commandInput" autocomplete="off" autofocus />
   </div>
 
+  <audio id="typeSound" src="https://cdn.pixabay.com/audio/2023/03/03/audio_2aebef79c0.mp3"></audio>
+
   <script>
     const input = document.getElementById('commandInput');
     const output = document.getElementById('output');
+    const body = document.body;
+    const staticNoise = document.getElementById('staticNoise');
+    const typeSound = document.getElementById('typeSound');
 
     const responses = {
-      "/help": "Available commands:\n/pulse - Activate Shadow Pulse\n/lore - Reveal origin\n/exit - Close interface",
+      "/help": "Available commands:\n/pulse - Activate Shadow Pulse\n/lore - Reveal origin\n/unlock - Enter static zone\n/exit - Close interface",
       "/pulse": "Initializing Pulse Signal...\n> Connection: Stable\n> Frequency: 404.9 MHz\n> Status: Online.",
-      "/lore": "In the shadows of forgotten code, a phantom entity was born. You are now inside its signal.",
+      "/lore": "Decrypting origins...\n",
+      "/unlock": "Static engaged. Signal breach authorized.\n>> Accessing... [X]",
       "/exit": "Session terminated. Reload to reconnect.",
     };
+
+    const loreScroll = [
+      "Long ago...",
+      "In the void of abandoned data...",
+      "A presence formed.",
+      "Not human. Not code. Something else.",
+      "You’re not just watching. You’re inside it now.",
+      "Welcome to ShadowPulse X."
+    ];
 
     input.addEventListener("keydown", function (event) {
       if (event.key === "Enter") {
         const command = input.value.trim();
         const response = responses[command] || "Unknown command. Try /help.";
-        output.textContent += `\n> ${command}\n${response}`;
+        output.textContent += `\n> ${command}\n`;
+
+        // Play type SFX
+        typeSound.currentTime = 0;
+        typeSound.play();
+
+        if (command === "/pulse") {
+          body.classList.add("glitch-flicker");
+          setTimeout(() => body.classList.remove("glitch-flicker"), 1500);
+          output.textContent += response;
+        } else if (command === "/lore") {
+          let i = 0;
+          const interval = setInterval(() => {
+            if (i < loreScroll.length) {
+              output.textContent += loreScroll[i] + "\n";
+              i++;
+              output.scrollTop = output.scrollHeight;
+            } else {
+              clearInterval(interval);
+            }
+          }, 800);
+        } else if (command === "/unlock") {
+          output.textContent += response;
+          staticNoise.style.display = "block";
+          setTimeout(() => staticNoise.style.display = "none", 3000);
+        } else {
+          output.textContent += response;
+        }
+
         input.value = "";
         output.scrollTop = output.scrollHeight;
       }
