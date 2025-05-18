@@ -1,18 +1,54 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ShadowPulse X v3.0</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ShadowPulse X v3</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #0ff;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    #output {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      background: #000;
+      text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
+    }
+    #commandInput {
+      border: none;
+      outline: none;
+      background: transparent;
+      color: #0ff;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 1.2em;
+      padding: 15px 20px;
+      caret-color: #0ff;
+      animation: flicker 1.5s infinite alternate;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .command-line {
+      color: #0ff;
+      text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
+      animation: flicker 2s infinite alternate;
+    }
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+  </style>
 </head>
 <body>
-  <div class="static" id="staticNoise"></div>
-  <div class="terminal aura" id="terminal">
-    <div id="output">ShadowPulse X Interface\nType /help to begin...</div>
-    <input type="text" id="commandInput" autocomplete="off" autofocus />
-  </div>
-  <audio id="typeSound" src="https://cdn.pixabay.com/audio/2023/03/03/audio_2aebef79c0.mp3"></audio>
-  <audio id="bgAudio" src="https://cdn.pixabay.com/audio/2022/10/31/audio_b8dd824174.mp3" loop></audio>
+  <div id="output"></div>
+  <input id="commandInput" type="text" autocomplete="off" spellcheck="false" autofocus placeholder="PhantomX> " />
   <script src="script.js"></script>
 </body>
 </html>
