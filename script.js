@@ -1,63 +1,68 @@
-// script.js v3.0 ShadowPulse X effects
-
 const output = document.getElementById('output');
-const terminal = document.getElementById('terminal');
-const staticNoise = document.getElementById('staticNoise');
 const commandInput = document.getElementById('commandInput');
 
-// Glitch flicker effect on new output lines
-function glitchFlickerEffect(line) {
-  line.classList.add('glitch-flicker');
-  setTimeout(() => {
-    line.classList.remove('glitch-flicker');
-  }, 1000);
-}
+let promptPrefix = 'PhantomX> ';
 
-// Vault fade effect on terminal container
-function vaultFadeEffect() {
-  terminal.classList.add('vault-fade');
-  setTimeout(() => {
-    terminal.classList.remove('vault-fade');
-  }, 2000);
-}
-
-// Toggle ghost mode (dim + soft text)
-function toggleGhostMode(enable) {
-  if (enable) {
-    terminal.classList.add('ghost-dim');
-    output.classList.add('ghost-output');
-  } else {
-    terminal.classList.remove('ghost-dim');
-    output.classList.remove('ghost-output');
-  }
-}
-
-// Toggle static noise overlay
-function toggleStaticNoise(show) {
-  staticNoise.style.display = show ? 'block' : 'none';
-}
-
-// Handle command submission with effects
-function handleCommand(command) {
+function addLine(text, options = {}) {
   const line = document.createElement('div');
-  line.textContent = '> ' + command;
+  if (options.isCommand) {
+    line.textContent = promptPrefix + text;
+    line.classList.add('command-line');
+  } else if (options.isTyping) {
+    line.textContent = '';
+    output.appendChild(line);
+    typeWriter(text, line, 0);
+    return;
+  } else {
+    line.textContent = text;
+  }
   output.appendChild(line);
-
-  glitchFlickerEffect(line);
-  vaultFadeEffect();
-  toggleGhostMode(true);
-  toggleStaticNoise(true);
-
-  // Remove effects after delay
-  setTimeout(() => {
-    toggleGhostMode(false);
-    toggleStaticNoise(false);
-  }, 4000);
-
   output.scrollTop = output.scrollHeight;
 }
 
-// Event listener for Enter key
+function typeWriter(text, element, index) {
+  if (index < text.length) {
+    element.textContent += text.charAt(index);
+    setTimeout(() => typeWriter(text, element, index + 1), 30);
+  } else {
+    output.scrollTop = output.scrollHeight;
+  }
+}
+
+function clearOutput() {
+  output.innerHTML = '';
+}
+
+function handleCommand(input) {
+  if (!input.trim()) return;
+  addLine(input, { isCommand: true });
+
+  const command = input.toLowerCase();
+
+  switch (command) {
+    case 'help':
+      addLine('Commands: help, about, music, trade, clear, secret', { isTyping: true });
+      break;
+    case 'about':
+      addLine('Phantom X — trader, lyricist, ghost in the machine.', { isTyping: true });
+      break;
+    case 'music':
+      addLine('Latest vibe here: https://link-to-your-music.com', { isTyping: true });
+      break;
+    case 'trade':
+      addLine('Trading edge: silent precision, market shadows, wealth in whispers.', { isTyping: true });
+      break;
+    case 'clear':
+      clearOutput();
+      break;
+    case 'secret':
+      addLine('You found the shadow pulse. Keep it locked.', { isTyping: true });
+      break;
+    default:
+      addLine(`Unknown command: ${command}`, { isTyping: true });
+  }
+}
+
 commandInput.addEventListener('keydown', e => {
   if (e.key === 'Enter' && commandInput.value.trim()) {
     handleCommand(commandInput.value.trim());
