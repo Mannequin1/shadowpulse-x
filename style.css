@@ -1,104 +1,125 @@
-/* style.css */
+/* style.css v3.0 Pro Mode */
 
 body {
-  margin: 0;
   background: #0a0a0a;
   color: #00ffcc;
-  font-family: 'Courier New', monospace;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  font-family: 'Courier New', Courier, monospace;
+  margin: 0;
   height: 100vh;
   overflow: hidden;
-  transition: background 0.3s;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  background-color: #000;
 }
 
-.terminal {
-  background: #000000;
-  padding: 30px;
+#terminal {
+  background: #040404;
+  border: 2px solid #00ffcc;
   border-radius: 8px;
-  box-shadow: 0 0 30px #00ffcc55;
-  width: 90%;
-  max-width: 650px;
-  user-select: none;
+  width: 80vw;
+  max-width: 900px;
+  height: 60vh;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 0 20px #00ffcc88;
   position: relative;
+  overflow: hidden;
 }
 
 #output {
-  white-space: pre-wrap;
-  min-height: 250px;
-  margin-bottom: 10px;
-  line-height: 1.3em;
-  max-height: 320px;
+  flex-grow: 1;
   overflow-y: auto;
-  font-size: 16px;
+  white-space: pre-wrap;
+  font-size: 1.1rem;
+  line-height: 1.3;
+  text-shadow:
+    0 0 3px #00ffcc,
+    0 0 10px #00ffcc;
 }
 
-input {
-  width: 100%;
-  padding: 10px;
-  background: #0a0a0a;
+#commandInput {
+  background: #000;
   border: none;
   border-top: 1px solid #00ffcc;
   color: #00ffcc;
-  font-family: inherit;
-  font-size: 16px;
+  font-family: monospace;
+  font-size: 1.1rem;
+  padding: 10px;
   outline: none;
+  box-shadow:
+    inset 0 0 5px #00ffcc88;
 }
 
+/* Glitch flicker animation for output lines */
 .glitch-flicker {
-  animation: flicker 0.2s infinite alternate;
+  animation: glitch-flicker 1s ease-in-out;
 }
 
-@keyframes flicker {
-  from { background-color: #0a0a0a; }
-  to { background-color: #111111; }
+@keyframes glitch-flicker {
+  0%, 100% {opacity: 1;}
+  20% {opacity: 0.8;}
+  40% {opacity: 0.6;}
+  60% {opacity: 0.9;}
+  80% {opacity: 0.7;}
 }
 
-.aura {
-  box-shadow: 0 0 20px #00ffcc44, 0 0 60px #00ffcc22;
-}
-
-.static {
-  position: fixed;
+/* Static noise overlay for pulse effect */
+#staticNoise {
+  display: none;
+  position: absolute;
   top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif') center center / cover;
-  z-index: 999;
-  opacity: 0.07;
+  width: 100%; height: 100%;
   pointer-events: none;
+  background: url('https://i.imgur.com/6Z5fY5G.gif') repeat;
+  mix-blend-mode: screen;
+  opacity: 0.15;
+  z-index: 10;
+}
+
+/* Background audio hidden */
+#audioContainer {
   display: none;
 }
 
-/* Red flicker for vault fade */
-.vault-fade {
-  animation: vaultFade 2s forwards;
-}
-
-@keyframes vaultFade {
-  0% {
-    background-color: transparent;
-  }
-  50% {
-    background-color: #ff000055;
-  }
-  100% {
-    background-color: #000000;
-  }
-}
-
-/* Dim glow for ghost mode */
-.ghost-dim {
-  background-color: #001010;
-  color: #007766;
-  box-shadow: none !important;
-}
-
+/* Ghost mode styling */
 .ghost-output {
-  animation: ghostFlicker 1.5s infinite alternate;
+  color: #a0f0ffaa;
+  text-shadow:
+    0 0 7px #a0f0ffcc,
+    0 0 20px #a0f0ffcc;
+  font-style: italic;
 }
 
-@keyframes ghostFlicker {
-  0% {opacity: 0.8;}
-  100% {opacity: 1;}
+.ghost-dim {
+  background-color: #001e26;
+  transition: background-color 0.8s ease-in-out;
+}
+
+/* Vault fade effect */
+.vault-fade {
+  animation: vaultFadeAnim 2s ease forwards;
+}
+
+@keyframes vaultFadeAnim {
+  0% { filter: brightness(1) blur(0); }
+  50% { filter: brightness(0.5) blur(3px) grayscale(70%);}
+  100% { filter: brightness(1) blur(0); }
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+  #terminal {
+    width: 95vw;
+    height: 70vh;
+  }
+
+  #commandInput {
+    font-size: 1rem;
+  }
 }
