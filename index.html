@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ShadowPulse X</title>
+  <style>
+    body {
+      margin: 0;
+      background: #050505;
+      font-family: monospace;
+      color: #0ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+      overflow: hidden;
+    }
+    .glow-box {
+      border: 2px solid #0ff;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 0 20px #0ff, 0 0 60px #0ff3;
+      animation: pulse 3s ease-in-out infinite alternate;
+    }
+    h1 {
+      font-size: 2.5rem;
+      text-shadow: 0 0 10px #0ff, 0 0 30px #0ff;
+    }
+    p {
+      color: #0ffb;
+      margin-top: 1rem;
+      font-weight: 500;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 20px #0ff; }
+      100% { box-shadow: 0 0 40px #0ff, 0 0 80px #0ff; }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-box">
+    <h1>ShadowPulse X</h1>
+    <p>Live from the dark side. More loading soon...</p>
+  </div>
+</body>
+  </html>
