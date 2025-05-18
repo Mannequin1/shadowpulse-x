@@ -8,43 +8,68 @@
     body {
       margin: 0;
       background: #0a0a0a;
-      color: #f5f5f5;
+      color: #00ffcc;
       font-family: 'Courier New', monospace;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      overflow: hidden;
     }
 
-    .glitch-text {
-      font-size: 2em;
-      letter-spacing: 2px;
-      animation: fadeIn 2s ease-in;
+    .terminal {
+      background: #000000;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 20px #00ffcc33;
+      width: 90%;
+      max-width: 600px;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    #output {
+      white-space: pre-wrap;
+      min-height: 200px;
+      margin-bottom: 10px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      background: #0a0a0a;
+      border: none;
+      border-top: 1px solid #00ffcc;
+      color: #00ffcc;
+      font-family: inherit;
+      font-size: 16px;
+      outline: none;
     }
   </style>
 </head>
 <body>
-  <h1 class="glitch-text" id="introText"></h1>
+  <div class="terminal">
+    <div id="output">ShadowPulse X Interface\nType /help to begin...</div>
+    <input type="text" id="commandInput" autocomplete="off" autofocus />
+  </div>
 
   <script>
-    const text = "Live from the dark side...";
-    let i = 0;
+    const input = document.getElementById('commandInput');
+    const output = document.getElementById('output');
 
-    function typeEffect() {
-      if (i < text.length) {
-        document.getElementById("introText").innerHTML = text.substring(0, i + 1);
-        i++;
-        setTimeout(typeEffect, 100);
+    const responses = {
+      "/help": "Available commands:\n/pulse - Activate Shadow Pulse\n/lore - Reveal origin\n/exit - Close interface",
+      "/pulse": "Initializing Pulse Signal...\n> Connection: Stable\n> Frequency: 404.9 MHz\n> Status: Online.",
+      "/lore": "In the shadows of forgotten code, a phantom entity was born. You are now inside its signal.",
+      "/exit": "Session terminated. Reload to reconnect.",
+    };
+
+    input.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        const command = input.value.trim();
+        const response = responses[command] || "Unknown command. Try /help.";
+        output.textContent += `\n> ${command}\n${response}`;
+        input.value = "";
+        output.scrollTop = output.scrollHeight;
       }
-    }
-
-    window.onload = typeEffect;
+    });
   </script>
 </body>
 </html>
