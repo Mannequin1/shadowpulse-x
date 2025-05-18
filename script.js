@@ -1,4 +1,4 @@
-// script.js
+// script.js v3.0 Pro Mode
 
 const output = document.getElementById('output');
 const input = document.getElementById('commandInput');
@@ -6,7 +6,10 @@ const bgAudio = document.getElementById('bgAudio');
 const typeSound = document.getElementById('typeSound');
 const staticNoise = document.getElementById('staticNoise');
 
-let memoryVault = [];
+let memoryVault = JSON.parse(localStorage.getItem('memoryVault')) || [];
+let ghostMode = JSON.parse(localStorage.getItem('ghostMode')) || false;
+let vaultLocked = false;
+let vaultPasscode = null;
 
 function appendOutput(text, className = '') {
   const span = document.createElement('span');
@@ -14,6 +17,14 @@ function appendOutput(text, className = '') {
   if (className) span.classList.add(className);
   output.appendChild(span);
   output.scrollTop = output.scrollHeight;
+}
+
+function saveVault() {
+  localStorage.setItem('memoryVault', JSON.stringify(memoryVault));
+}
+
+function saveGhostMode() {
+  localStorage.setItem('ghostMode', JSON.stringify(ghostMode));
 }
 
 function playTypeSound() {
@@ -36,12 +47,16 @@ function vaultFadeEffect() {
 }
 
 function ghostModeEffect(enable) {
+  ghostMode = enable;
+  saveGhostMode();
   if (enable) {
     output.classList.add('ghost-output');
     document.body.classList.add('ghost-dim');
+    appendOutput('Ghost mode enabled. Speak your mind...');
   } else {
     output.classList.remove('ghost-output');
     document.body.classList.remove('ghost-dim');
+    appendOutput('Ghost mode disabled.');
   }
 }
 
@@ -58,15 +73,74 @@ function stopBackgroundAudio() {
   }
 }
 
+function simulateAIGhost(query) {
+  // Simple AI ghost reply logic
+  const q = query.toLowerCase();
+  if (q.includes('trade') || q.includes('market')) {
+    return 'Trade sharp, move silent. Let price whisper your next move.';
+  } else if (q.includes('lore')) {
+    return 'ShadowPulse was forged in the data streams, a phantom in the market maze.';
+  } else if (q.includes('hello') || q.includes('hi')) {
+    return 'Greetings, trader. The shadows watch and wait.';
+  } else if (q.includes('help')) {
+    return 'Use commands: /pulse, /vault, /ghost, /remember, /recall, /lock, /unlock, /clear.';
+  }
+  return "The ghost has no answer for that... yet.";
+}
+
+function lockVault(pass) {
+  if (vaultLocked) {
+    appendOutput('Vault is already locked.');
+    return;
+  }
+  if (!pass) {
+    appendOutput('Passcode required to lock vault.');
+    return;
+  }
+  vaultLocked = true;
+  vaultPasscode = pass;
+  appendOutput('Vault locked. Memory vault hidden.');
+}
+
+function unlockVault(pass) {
+  if (!vaultLocked) {
+    appendOutput('Vault is not locked.');
+    return;
+  }
+  if (pass === vaultPasscode) {
+    vaultLocked = false;
+    vaultPasscode = null;
+    appendOutput('Vault unlocked. Memory vault visible.');
+  } else {
+    appendOutput('Incorrect passcode. Access denied.');
+  }
+}
+
 function processCommand(cmd) {
   playTypeSound();
   const parts = cmd.trim().split(' ');
   const base = parts[0].toLowerCase();
   const args = parts.slice(1);
 
+  if (vaultLocked && base !== '/unlock' && base !== '/help') {
+    appendOutput('Vault is locked. Use /unlock [passcode] to access.');
+    return;
+  }
+
   switch(base) {
     case '/help':
-      appendOutput('Available commands:\n/pulse\n/vault\n/ghost\n/remember [text]\n/recall\n/unlock\n/clear\n/help');
+      appendOutput(
+        'Commands:\n' +
+        '/pulse - Start pulse effect\n' +
+        '/vault - Show memory vault contents\n' +
+        '/ghost - Toggle ghost mode\n' +
+        '/remember [text] - Add entry to vault\n' +
+        '/recall - List vault entries\n' +
+        '/lock [passcode] - Lock the vault\n' +
+        '/unlock [passcode] - Unlock the vault\n' +
+        '/clear - Clear terminal output\n' +
+        '/ask [question] - Ask the ghost AI'
+      );
       break;
 
     case '/pulse':
@@ -77,12 +151,15 @@ function processCommand(cmd) {
 
     case '/vault':
       vaultFadeEffect();
-      appendOutput('Vault accessed. Items stored:\n' + (memoryVault.length ? memoryVault.join('\n') : 'Vault empty.'));
+      if(memoryVault.length === 0) {
+        appendOutput('Vault empty.');
+      } else {
+        appendOutput('Vault contents:\n' + memoryVault.join('\n'));
+      }
       break;
 
     case '/ghost':
-      ghostModeEffect(true);
-      appendOutput('Ghost mode enabled. Speak your mind...');
+      ghostModeEffect(!ghostMode);
       break;
 
     case '/remember':
@@ -91,6 +168,7 @@ function processCommand(cmd) {
       } else {
         const data = args.join(' ');
         memoryVault.push(data);
+        saveVault();
         appendOutput(`Remembered: "${data}"`);
       }
       break;
@@ -103,12 +181,26 @@ function processCommand(cmd) {
       }
       break;
 
+    case '/lock':
+      lockVault(args[0]);
+      break;
+
     case '/unlock':
-      appendOutput('Unlocking sequences... no real locks here.');
+      unlockVault(args[0]);
       break;
 
     case '/clear':
       output.innerHTML = '';
+      break;
+
+    case '/ask':
+      if(args.length === 0) {
+        appendOutput('You must ask something.');
+      } else {
+        const question = args.join(' ');
+        const answer = simulateAIGhost(question);
+        appendOutput(`> ${question}\n${answer}`);
+      }
       break;
 
     default:
@@ -126,6 +218,9 @@ input.addEventListener('keydown', (e) => {
     }
   }
 });
+
+// Init saved ghost mode
+if(ghostMode) ghostModeEffect(true);
 
 // Auto-focus input on load
 input.focus();
