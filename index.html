@@ -1,85 +1,86 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ShadowPulse X v3 - Cinematic</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
-    body {
-      margin: 0;
-      background: linear-gradient(270deg, #000, #001f1f, #000);
-      background-size: 600% 600%;
-      animation: bgAnimation 20s ease infinite;
-      color: #0ff;
-      font-family: 'Share Tech Mono', monospace;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
-    }
-    #output {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      text-shadow:
-        0 0 5px #0ff,
-        0 0 10px #0ff,
-        0 0 20px #0ff,
-        0 0 40px #00ffff;
-      filter: drop-shadow(0 0 1px #0ff);
-      user-select: none;
-    }
-    #commandInput {
-      border: none;
-      outline: none;
-      background: transparent;
-      color: #0ff;
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 1.2em;
-      padding: 15px 20px;
-      caret-color: #0ff;
-      width: 100%;
-      box-sizing: border-box;
-      animation: flicker 1.5s infinite alternate;
-    }
-    .command-line {
-      color: #0ff;
-      text-shadow:
-        0 0 10px #0ff,
-        0 0 20px #0ff,
-        0 0 40px #00ffff;
-      animation: flicker 2s infinite alternate;
-      user-select: text;
-    }
-    .fade-in {
-      animation: fadeIn 0.8s ease forwards;
-      opacity: 0;
-    }
-
-    @keyframes flicker {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.6; }
-    }
-    @keyframes fadeIn {
-      to {
-        opacity: 1;
-      }
-    }
-    @keyframes bgAnimation {
-      0% { background-position: 0% 50% }
-      50% { background-position: 100% 50% }
-      100% { background-position: 0% 50% }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ShadowPulse X Terminal</title>
+<style>
+  body {
+    background-color: #000;
+    color: #0ff;
+    font-family: 'Courier New', Courier, monospace;
+    margin: 0;
+    padding: 20px;
+    overflow-x: hidden;
+  }
+  #output {
+    min-height: 300px;
+    max-height: 70vh;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    line-height: 1.4;
+    user-select: none;
+    margin-bottom: 10px;
+  }
+  #inputLine {
+    display: flex;
+  }
+  #prompt {
+    color: #0ff;
+    margin-right: 5px;
+    user-select: none;
+  }
+  #commandInput {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #0ff;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1em;
+    flex-grow: 1;
+  }
+  #mediaPlayer {
+    display: none;
+    padding: 20px;
+    text-align: center;
+    color: #0ff;
+    user-select: none;
+  }
+  #musicFrame {
+    border: none;
+    width: 300px;
+    height: 80px;
+  }
+  #musicInfo {
+    margin-top: 8px;
+    font-size: 0.9em;
+  }
+</style>
 </head>
 <body>
-  <div id="output" aria-live="polite" aria-atomic="true"></div>
-  <input id="commandInput" type="text" autocomplete="off" spellcheck="false" autofocus placeholder="PhantomX> " aria-label="Command input" />
-  <audio id="typeSound" src="https://freesound.org/data/previews/146/146723_2615114-lq.mp3" preload="auto"></audio>
-  <audio id="enterSound" src="https://freesound.org/data/previews/415/415209_5121236-lq.mp3" preload="auto"></audio>
+  <div id="output"></div>
+
+  <div id="mediaPlayer">
+    <iframe
+      id="musicFrame"
+      src=""
+      allow="autoplay"
+      allowfullscreen
+      ></iframe>
+    <div id="musicInfo"></div>
+  </div>
+
+  <div id="inputLine">
+    <span id="prompt">ShadowPulse &gt;</span>
+    <input
+      type="text"
+      id="commandInput"
+      autocomplete="off"
+      spellcheck="false"
+      autofocus
+      />
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>
