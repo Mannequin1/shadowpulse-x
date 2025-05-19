@@ -1,26 +1,37 @@
 const output = document.getElementById('output');
 const commandInput = document.getElementById('commandInput');
+const typeSound = document.getElementById('typeSound');
+const enterSound = document.getElementById('enterSound');
 
 let promptPrefix = 'PhantomX> ';
 let commandHistory = [];
 let historyIndex = -1;
+let isTyping = false;
 
-// Typewriter effect with optional callback
-function typeWriter(text, element, index = 0, cb = null) {
-  if (index < text.length) {
-    element.textContent += text.charAt(index);
-    setTimeout(() => typeWriter(text, element, index + 1, cb), 30);
-  } else {
-    output.scrollTop = output.scrollHeight;
-    if (cb) cb();
+function playSound(sound) {
+  if (!sound) return;
+  sound.currentTime = 0;
+  sound.play().catch(() => {});
+}
+
+// Async typewriter with sound
+async function typeWriter(text, element, delay = 40) {
+  isTyping = true;
+  element.textContent = '';
+  for (let i = 0; i < text.length; i++) {
+    element.textContent += text.charAt(i);
+    playSound(typeSound);
+    await new Promise(res => setTimeout(res, delay));
   }
+  isTyping = false;
+  output.scrollTop = output.scrollHeight;
 }
 
 function addLine(text, options = {}) {
   const line = document.createElement('div');
   if (options.isCommand) {
     line.textContent = promptPrefix + text;
-    line.classList.add('command-line');
+    line.classList.add('command-line', 'fade-in');
   } else if (options.isTyping) {
     line.textContent = '';
     output.appendChild(line);
@@ -28,6 +39,7 @@ function addLine(text, options = {}) {
     return;
   } else {
     line.textContent = text;
+    line.classList.add('fade-in');
   }
   output.appendChild(line);
   output.scrollTop = output.scrollHeight;
@@ -41,11 +53,12 @@ function getCurrentDateTime() {
   return new Date().toLocaleString();
 }
 
-function handleCommand(input) {
-  if (!input.trim()) return;
-  addLine(input, { isCommand: true });
+async function handleCommand(input) {
+  if (!input.trim() || isTyping) return;
 
-  // Add to history, reset historyIndex
+  addLine(input, { isCommand: true });
+  playSound(enterSound);
+
   commandHistory.push(input);
   historyIndex = commandHistory.length;
 
@@ -53,9 +66,11 @@ function handleCommand(input) {
 
   switch (command) {
     case 'help':
+      await typeWriter('Commands: help, about, music, trade, clear, secret, time', document.createElement('div'));
       addLine('Commands: help, about, music, trade, clear, secret, time', { isTyping: true });
       break;
     case 'about':
+      await typeWriter('Phantom X — trader, lyricist, ghost in the machine.', document.createElement('div'));
       addLine('Phantom X — trader, lyricist, ghost in the machine.', { isTyping: true });
       break;
     case 'music':
@@ -78,8 +93,11 @@ function handleCommand(input) {
   }
 }
 
-// Arrow key navigation for command history
 commandInput.addEventListener('keydown', e => {
+  if (isTyping) {
+    e.preventDefault(); // block input while typing anim runs
+    return;
+  }
   if (e.key === 'Enter' && commandInput.value.trim()) {
     handleCommand(commandInput.value.trim());
     commandInput.value = '';
