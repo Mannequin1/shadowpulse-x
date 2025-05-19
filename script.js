@@ -75,5 +75,5 @@ function sendPushNotification(message) {
 fetchPrice();
 fetchTraderSignals();
 
-setInterval(fetchPrice, 15000);         // update price every 15s
-setInterval(fetchTraderSignals, 60000); // update signals every 60s
+setInterval(fetchPrice, 15000);         // update price every 15 seconds
+setInterval(fetchTraderSignals, 60000); // update signals every 60 seconds
