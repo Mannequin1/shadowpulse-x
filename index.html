@@ -1,35 +1,55 @@
-<div id="trading-dashboard" style="padding:20px; background:rgba(0,0,0,0.7); color:#eee; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width:400px; margin: 20px auto; border-radius:10px;">
-  <h2 style="text-align:center; margin-bottom:10px;">WealthMind Trader Live</h2>
-  <div>
-    <strong>EUR/USD Price:</strong> <span id="price">Loading...</span>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WealthMind Trader Live</title>
+  <style>
+    #trading-dashboard {
+      padding: 20px; 
+      background: rgba(0,0,0,0.7); 
+      color: #eee; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      max-width: 400px; 
+      margin: 20px auto; 
+      border-radius: 10px;
+    }
+    .signal {
+      padding: 8px 12px;
+      margin: 6px 0;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      opacity: 0.85;
+      transition: opacity 0.3s ease;
+    }
+    .signal.buy {
+      background-color: #2ecc71;
+      color: #fff;
+      animation: pulse 1.8s infinite;
+    }
+    .signal.sell {
+      background-color: #e74c3c;
+      color: #fff;
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% {opacity: 0.85;}
+      50% {opacity: 1;}
+    }
+  </style>
+</head>
+<body>
+  <div id="trading-dashboard">
+    <h2 style="text-align:center; margin-bottom:10px;">WealthMind Trader Live</h2>
+    <div>
+      <strong>EUR/USD Price:</strong> <span id="price">Loading...</span>
+    </div>
+    <div id="signals-container" style="margin-top:15px;">
+      <!-- Signals appear here -->
+    </div>
   </div>
-  <div id="signals-container" style="margin-top:15px;">
-    <!-- Signals appear here -->
-  </div>
-</div>
 
-<style>
-  .signal {
-    padding: 8px 12px;
-    margin: 6px 0;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 14px;
-    opacity: 0.85;
-    transition: opacity 0.3s ease;
-  }
-  .signal.buy {
-    background-color: #2ecc71;
-    color: #fff;
-    animation: pulse 1.8s infinite;
-  }
-  .signal.sell {
-    background-color: #e74c3c;
-    color: #fff;
-    animation: pulse 1.8s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% {opacity: 0.85;}
-    50% {opacity: 1;}
-  }
-</style>
+  <script src="script.js"></script>
+</body>
+</html>
