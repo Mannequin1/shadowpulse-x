@@ -109,20 +109,21 @@ function startSessionTimer(minutes) {
   }
 
   print(`Session started: ${minutes} minute(s). Counting down...`);
-  const timerId = setInterval(() => {
+
+  sessionTimerInterval = setInterval(() => {
     let mins = Math.floor(timeLeft / 60);
     let secs = timeLeft % 60;
-    output.innerHTML = output.innerHTML.replace(/Session Timer:.*<br>/, '');
+    // Remove previous timer line:
+    let timerLineRegex = /Session Timer:.*<br>/g;
+    output.innerHTML = output.innerHTML.replace(timerLineRegex, '');
     print(`Session Timer: ${mins}:${secs < 10 ? '0' + secs : secs}<br>`);
     timeLeft--;
 
     if (timeLeft < 0) {
-      clearInterval(timerId);
+      clearInterval(sessionTimerInterval);
       print("Session ended.");
     }
   }, 1000);
-
-  sessionTimerInterval = timerId;
 }
 
 // Toggle smart alerts placeholder
@@ -191,27 +192,4 @@ function handleCommand(cmd) {
       break;
 
     default:
-      print(`Unknown command: ${cmd}. Type 'help' for commands.`);
-  }
-}
-
-// Event listener for command input
-commandInput.addEventListener('keydown', (e) => {
-  if(e.key === 'Enter') {
-    const val = commandInput.value.trim();
-    if(val) {
-      print(`> ${val}`);
-      handleCommand(val);
-      commandInput.value = '';
-    }
-  }
-});
-
-// Close music button handler
-document.getElementById('closeMusicBtn').addEventListener('click', () => {
-  closeMusic();
-});
-
-// On load welcome message
-print("Welcome to ShadowPulse-X WealthMind Trader.");
-print("Type 'help' for available commands.");
+      print(`Unknown command
