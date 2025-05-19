@@ -3,185 +3,154 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ShadowPulse X – Phantom Signals</title>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <title>Pricing Plans</title>
   <style>
     body {
-      background-color: #0d0d0d;
-      color: #e0e0e0;
-      font-family: 'Share Tech Mono', monospace;
+      background: #121212;
+      color: #eee;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       padding: 0;
-      overflow-x: hidden;
     }
-
-    /* Loader Screen */
-    #loader {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #0d0d0d;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      font-size: 1.2rem;
-      line-height: 1.6;
-      color: #888;
-      user-select: none;
-      z-index: 9999;
-      white-space: pre-line;
-    }
-
-    #loader span {
-      display: block;
-      opacity: 0;
-      animation: fadeInOut 2s ease forwards;
-    }
-
-    #loader span:nth-child(1) { animation-delay: 0s; }
-    #loader span:nth-child(2) { animation-delay: 0.7s; }
-    #loader span:nth-child(3) { animation-delay: 1.4s; }
-
-    @keyframes fadeInOut {
-      0% { opacity: 0; }
-      30% { opacity: 1; }
-      100% { opacity: 0; }
-    }
-
-    /* Hide dashboard while loader active */
-    #dashboardContainer {
-      opacity: 0;
-      transition: opacity 0.6s ease;
-    }
-
-    /* Show dashboard */
-    #dashboardContainer.visible {
-      opacity: 1;
-    }
-
-    header {
-      padding: 2rem;
-      text-align: center;
-      background: linear-gradient(to right, #121212, #1a1a1a);
-      border-bottom: 1px solid #333;
-    }
-
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-      color: #ffffff;
-    }
-
-    p {
-      color: #888;
-      font-size: 0.9rem;
-    }
-
-    .dashboard {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-      padding: 2rem;
-      max-width: 1200px;
+    #pricing {
+      padding: 60px 20px;
+      max-width: 1000px;
       margin: 0 auto;
     }
-
-    .signal-card {
-      background-color: #161616;
-      border: 1px solid #333;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(255, 0, 100, 0.1);
-      transition: transform 0.2s ease;
+    #pricing h2 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 40px;
     }
-
-    .signal-card:hover {
-      transform: scale(1.02);
-      box-shadow: 0 0 20px rgba(255, 0, 100, 0.3);
+    .plans {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
     }
-
-    .tag {
-      display: inline-block;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      margin-bottom: 0.5rem;
+    .plan {
+      background: #1f1f1f;
+      border-radius: 12px;
+      padding: 30px;
+      flex: 1 1 280px;
+      max-width: 320px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      color: #eee;
+      position: relative;
+    }
+    .plan.pro {
+      background: linear-gradient(135deg, #9f5fff, #4f00ff);
       color: #fff;
+      box-shadow: 0 0 25px rgba(159, 95, 255, 0.7);
     }
-
-    .buy { background-color: #00c896; }
-    .sell { background-color: #ff3c3c; }
-    .confidence-high { background-color: #d100ff; }
-    .confidence-medium { background-color: #ff9f00; }
-    .confidence-low { background-color: #007bff; }
+    .plan.pro .badge {
+      position: absolute;
+      top: -12px;
+      right: -12px;
+      background: #ff4081;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .plan h3 {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+    }
+    .price {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 25px;
+    }
+    .price span {
+      font-weight: 400;
+      font-size: 1rem;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 30px;
+      flex-grow: 1;
+    }
+    li {
+      margin-bottom: 12px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .plan.free button {
+      background: #4caf50;
+      color: #121212;
+    }
+    .plan.pro button {
+      background: #fff;
+      color: #4f00ff;
+      font-weight: 700;
+    }
+    .plan.elite button {
+      background: #4caf50;
+      color: #121212;
+    }
+    button:hover {
+      opacity: 0.85;
+    }
   </style>
 </head>
 <body>
 
-  <div id="loader" aria-label="Loading screen">
-    <span>Initializing ShadowPulse-X...</span>
-    <span>Authenticating signal feed...</span>
-    <span>Dashboard ready.</span>
-  </div>
+  <section id="pricing">
+    <h2>Choose Your Plan</h2>
+    <div class="plans">
+      
+      <div class="plan free">
+        <h3>Free</h3>
+        <p class="price">$0 <span>/ month</span></p>
+        <ul>
+          <li>Basic signals</li>
+          <li>Access to live dashboard</li>
+          <li>Community chat access</li>
+        </ul>
+        <button onclick="window.location.href='https://yourdomain.com/signup-free'">Get Started</button>
+      </div>
+      
+      <div class="plan pro">
+        <div class="badge">Popular</div>
+        <h3>Pro</h3>
+        <p class="price">$49 <span>/ month</span></p>
+        <ul>
+          <li>All basic features</li>
+          <li>Real-time sniper signals</li>
+          <li>Priority alerts & notifications</li>
+          <li>Exclusive market analysis</li>
+          <li>Access to premium education</li>
+        </ul>
+        <button onclick="window.location.href='https://buy.stripe.com/test_pro_plan_url'">Upgrade Now</button>
+      </div>
 
-  <div id="dashboardContainer" aria-live="polite">
-    <header>
-      <h1>SHADOWPULSE-X // SIGNAL DASHBOARD</h1>
-      <p>Encrypted Drops – Phantom Frequency</p>
-    </header>
+      <div class="plan elite">
+        <h3>Elite</h3>
+        <p class="price">$99 <span>/ month</span></p>
+        <ul>
+          <li>All Pro features</li>
+          <li>1-on-1 coaching & mentorship</li>
+          <li>Exclusive trade setups</li>
+          <li>Early access to app features</li>
+          <li>VIP community access</li>
+        </ul>
+        <button onclick="window.location.href='https://buy.stripe.com/test_elite_plan_url'">Join Elite</button>
+      </div>
 
-    <main class="dashboard" id="signalDashboard" role="region" aria-label="Trading signals">
-      <!-- Signal cards will load here -->
-    </main>
-  </div>
-
-  <script>
-    async function loadSignals() {
-      try {
-        const res = await fetch('signals.json', {cache: "no-store"});
-        if (!res.ok) throw new Error('Failed to fetch signals');
-        const signals = await res.json();
-        const container = document.getElementById('signalDashboard');
-        container.innerHTML = ''; // Clear old signals
-
-        signals.forEach(signal => {
-          const card = document.createElement('div');
-          card.className = 'signal-card';
-
-          card.innerHTML = `
-            <div class="tag ${signal.direction.toLowerCase()}">${signal.direction}</div>
-            <h3>${signal.pair}</h3>
-            <p><strong>Entry:</strong> ${signal.entry}</p>
-            <p><strong>SL:</strong> ${signal.sl}</p>
-            <p><strong>TP:</strong> ${signal.tp}</p>
-            <div class="tag confidence-${signal.confidence.toLowerCase()}">${signal.confidence} Confidence</div>
-            <p><strong>Status:</strong> ${signal.status}</p>
-            <p><em>Dropped:</em> ${signal.timestamp}</p>
-          `;
-
-          container.appendChild(card);
-        });
-      } catch (error) {
-        console.error('Error loading signals:', error);
-      }
-    }
-
-    // Show dashboard after loader animation
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        const loader = document.getElementById('loader');
-        loader.style.display = 'none';
-
-        const dashboard = document.getElementById('dashboardContainer');
-        dashboard.classList.add('visible');
-
-        loadSignals();
-
-        // Refresh signals every 30 seconds
-        setInterval(loadSignals, 30000);
-      }, 2500);
-    });
-  </script>
+    </div>
+  </section>
 
 </body>
 </html>
