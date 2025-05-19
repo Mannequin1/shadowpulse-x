@@ -1,84 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ShadowPulse X Terminal</title>
-<style>
-  body {
-    background-color: #000;
-    color: #0ff;
-    font-family: 'Courier New', Courier, monospace;
-    margin: 0;
-    padding: 20px;
-    overflow-x: hidden;
-  }
-  #output {
-    min-height: 300px;
-    max-height: 70vh;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    line-height: 1.4;
-    user-select: none;
-    margin-bottom: 10px;
-  }
-  #inputLine {
-    display: flex;
-  }
-  #prompt {
-    color: #0ff;
-    margin-right: 5px;
-    user-select: none;
-  }
-  #commandInput {
-    background: transparent;
-    border: none;
-    outline: none;
-    color: #0ff;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 1em;
-    flex-grow: 1;
-  }
-  #mediaPlayer {
-    display: none;
-    padding: 20px;
-    text-align: center;
-    color: #0ff;
-    user-select: none;
-  }
-  #musicFrame {
-    border: none;
-    width: 300px;
-    height: 80px;
-  }
-  #musicInfo {
-    margin-top: 8px;
-    font-size: 0.9em;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ShadowPulse-X | WealthMind Trader Edition</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="output"></div>
+  <div id="container">
+    <h1>ShadowPulse-X</h1>
+    <div id="output" class="output"></div>
 
-  <div id="mediaPlayer">
-    <iframe
-      id="musicFrame"
-      src=""
-      allow="autoplay"
-      allowfullscreen
-      ></iframe>
-    <div id="musicInfo"></div>
-  </div>
-
-  <div id="inputLine">
-    <span id="prompt">ShadowPulse &gt;</span>
     <input
       type="text"
       id="commandInput"
+      placeholder="Enter command... (type 'help' for list)"
       autocomplete="off"
-      spellcheck="false"
-      autofocus
-      />
+    />
+
+    <div id="mediaPlayer" class="media-player" style="display:none;">
+      <iframe
+        id="musicFrame"
+        src=""
+        frameborder="0"
+        allow="autoplay"
+        allowfullscreen
+      ></iframe>
+      <div id="musicInfo"></div>
+      <button id="closeMusicBtn">Close Music</button>
+    </div>
   </div>
 
   <script src="script.js"></script>
