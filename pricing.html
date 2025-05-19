@@ -1,142 +1,106 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Phantom Signal Plans | ShadowPulse X</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Orbitron', sans-serif;
-      background: #0d0d0d;
-      color: #f5f5f5;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 60px 20px;
-    }
+border: 1px solid #00ffd5;
+  border-radius: 12px;
+  padding: 30px;
+  width: 300px;
+  box-shadow: 0 0 15px rgba(0, 255, 213, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
-    h1 {
-      font-size: 3em;
-      margin-bottom: 10px;
-      color: #00ffd5;
-    }
+.plan:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 0 25px rgba(0, 255, 213, 0.3);
+}
 
-    p.subtitle {
-      font-size: 1.2em;
-      color: #aaaaaa;
-      margin-bottom: 60px;
-    }
+.plan h3 {
+  font-size: 1.8em;
+  color: #00ffd5;
+  margin-bottom: 10px;
+}
 
-    .pricing-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 30px;
-      max-width: 1200px;
-      width: 100%;
-    }
+.plan .price {
+  font-size: 2em;
+  margin: 15px 0;
+  color: #f5f5f5;
+}
 
-    .plan {
-      background: #1a1a1a;
-      border: 1px solid #2e2e2e;
-      border-radius: 20px;
-      padding: 40px;
-      flex: 1 1 300px;
-      max-width: 350px;
-      box-shadow: 0 0 15px rgba(0, 255, 213, 0.1);
-      transition: 0.3s ease;
-    }
+.plan ul {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
 
-    .plan:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 0 30px rgba(0, 255, 213, 0.3);
-    }
+.plan ul li {
+  margin: 10px 0;
+  color: #ccc;
+}
 
-    .plan h2 {
-      font-size: 1.8em;
-      margin-bottom: 20px;
-      color: #00ffd5;
-    }
+.plan button {
+  background: #00ffd5;
+  color: #0d0d0d;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
 
-    .price {
-      font-size: 2em;
-      margin: 20px 0;
-      color: #ffffff;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-      line-height: 1.8;
-      color: #ccc;
-    }
-
-    .btn {
-      display: inline-block;
-      margin-top: 25px;
-      padding: 12px 25px;
-      background: #00ffd5;
-      color: #000;
-      font-weight: bold;
-      border: none;
-      border-radius: 10px;
-      text-decoration: none;
-      transition: 0.3s;
-    }
-
-    .btn:hover {
-      background: #00bfa3;
-      color: #fff;
-    }
-
-    @media (max-width: 768px) {
-      .plan {
-        max-width: 100%;
-      }
-    }
+.plan button:hover {
+  background: #00c4a7;
+}
   </style>
 </head>
 <body>
-  <h1>Choose Your Phantom Access</h1>
-  <p class="subtitle">Unlock premium signals and elite tools. No fluff. Just domination.</p>
+  <header class="navbar">
+    <h1>Phantom X</h1>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#">Features</a>
+      <a href="#">Pricing</a>
+      <a href="#">Login</a>
+    </nav>
+  </header>
 
-  <div class="pricing-container">
+  <section class="hero">
+    <h2>Choose Your Power Tier</h2>
+    <p>Unlock full access to the Phantom X experience</p>
+  </section>
+
+  <section class="pricing-container">
     <div class="plan">
-      <h2>Phantom Basic</h2>
-      <p class="price">$29/mo</p>
+      <h3>Shadow</h3>
+      <div class="price">$9/month</div>
       <ul>
-        <li>Live Daily Signal</li>
-        <li>Support/Resistance Zones</li>
-        <li>Entry Alerts (1 Pair)</li>
+        <li>Basic Sniper Alerts</li>
+        <li>1 Asset (XAU/USD)</li>
+        <li>Weekly Market Map</li>
       </ul>
-      <a href="https://yourpaymentlink.com/basic" class="btn">Join Now</a>
+      <button>Activate</button>
     </div>
 
     <div class="plan">
-      <h2>Elite Access</h2>
-      <p class="price">$59/mo</p>
+      <h3>Pulse</h3>
+      <div class="price">$29/month</div>
       <ul>
-        <li>All Major FX & Gold Signals</li>
-        <li>Sniper Entry Zones</li>
-        <li>AI Trade Assistant Access</li>
-        <li>Telegram Bot Alerts</li>
+        <li>Multi-Asset Alerts</li>
+        <li>Smart Money Zones</li>
+        <li>Daily Market Flow</li>
+        <li>Early Phantom Journal Access</li>
       </ul>
-      <a href="https://yourpaymentlink.com/elite" class="btn">Join Now</a>
+      <button>Activate</button>
     </div>
 
     <div class="plan">
-      <h2>Shadow Tier</h2>
-      <p class="price">$99/mo</p>
+      <h3>Phantom Core</h3>
+      <div class="price">$59/month</div>
       <ul>
-        <li>Everything in Elite</li>
-        <li>1-on-1 Strategy Call Monthly</li>
-        <li>Custom Signal Requests</li>
-        <li>Private Member Vault</li>
+        <li>All Pulse Features</li>
+        <li>Live Entry Signals</li>
+        <li>Trade Guardian AI</li>
+        <li>Private Community Access</li>
       </ul>
-      <a href="https://yourpaymentlink.com/shadow" class="btn">Join Now</a>
+      <button>Activate</button>
     </div>
-  </div>
+  </section>
 </body>
 </html>
