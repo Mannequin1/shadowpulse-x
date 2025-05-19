@@ -1,46 +1,20 @@
 const output = document.getElementById('output');
-const commandInput = document.getElementById('commandInput');
-const typeSound = document.getElementById('typeSound');
-const enterSound = document.getElementById('enterSound');
+const input = document.getElementById('commandInput');
+const mediaPlayer = document.getElementById('mediaPlayer');
+const musicFrame = document.getElementById('musicFrame');
+const musicInfo = document.getElementById('musicInfo');
 
-let promptPrefix = 'PhantomX> ';
 let commandHistory = [];
-let historyIndex = -1;
+let historyIndex = 0;
 let isTyping = false;
 
-function playSound(sound) {
-  if (!sound) return;
-  sound.currentTime = 0;
-  sound.play().catch(() => {});
-}
+const API_KEY = 'YOUR_ALPHA_VANTAGE_API_KEY'; // Replace with your key
+const STOCK_SYMBOL = 'EURUSD'; // Example forex pair
 
-// Async typewriter with sound
-async function typeWriter(text, element, delay = 40) {
-  isTyping = true;
-  element.textContent = '';
-  for (let i = 0; i < text.length; i++) {
-    element.textContent += text.charAt(i);
-    playSound(typeSound);
-    await new Promise(res => setTimeout(res, delay));
-  }
-  isTyping = false;
-  output.scrollTop = output.scrollHeight;
-}
-
-function addLine(text, options = {}) {
+function addLine(text, { isTyping = false, isCommand = false } = {}) {
   const line = document.createElement('div');
-  if (options.isCommand) {
-    line.textContent = promptPrefix + text;
-    line.classList.add('command-line', 'fade-in');
-  } else if (options.isTyping) {
-    line.textContent = '';
-    output.appendChild(line);
-    typeWriter(text, line);
-    return;
-  } else {
-    line.textContent = text;
-    line.classList.add('fade-in');
-  }
+  line.textContent = text;
+  if (isCommand) line.style.color = '#0ff';
   output.appendChild(line);
   output.scrollTop = output.scrollHeight;
 }
@@ -49,35 +23,123 @@ function clearOutput() {
   output.innerHTML = '';
 }
 
-function getCurrentDateTime() {
-  return new Date().toLocaleString();
+async function fetchLivePrice() {
+  try {
+    const url = `https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=EUR&to_currency=USD&apikey=${API_KEY}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const rate = data['Realtime Currency Exchange Rate']['5. Exchange Rate'];
+    return parseFloat(rate).toFixed(5);
+  } catch {
+    return null;
+  }
 }
 
-async function handleCommand(input) {
-  if (!input.trim() || isTyping) return;
+let liveTradeInterval = null;
 
-  addLine(input, { isCommand: true });
-  playSound(enterSound);
+async function showLiveTrade() {
+  clearInterval(liveTradeInterval);
+  clearOutput();
+  mediaPlayer.style.display = 'none';
+  addLine('Fetching live EUR/USD price...', { isTyping: true });
 
-  commandHistory.push(input);
+  async function updatePrice() {
+    const price = await fetchLivePrice();
+    if (price) {
+      clearOutput();
+      addLine(`EUR/USD Live Price: ${price}`, { isTyping: true });
+    } else {
+      addLine('Failed to fetch live price.', { isTyping: true });
+    }
+  }
+
+  await updatePrice();
+  liveTradeInterval = setInterval(updatePrice, 15000);
+}
+
+function hideLiveTrade() {
+  clearInterval(liveTradeInterval);
+}
+
+function showMusic() {
+  clearOutput();
+  hideLiveTrade();
+  mediaPlayer.style.display = 'block';
+
+  // Put your own SoundCloud or YouTube embed URL here:
+  const musicURL = 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/123456789&auto_play=true';
+  musicFrame.src = musicURL;
+  musicInfo.textContent = 'Phantom X — New Rap Single (2025)';
+
+  addLine('Playing Phantom X latest track...', { isTyping: true });
+}
+
+function hideMusic() {
+  mediaPlayer.style.display = 'none';
+  musicFrame.src = '';
+  musicInfo.textContent = '';
+}
+
+function getCurrentDateTime() {
+  const now = new Date();
+  return now.toLocaleString();
+}
+
+function playSound(audio) {
+  if (!audio) return;
+  audio.currentTime = 0;
+  audio.play();
+}
+
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    handleCommand(input.value);
+    input.value = '';
+  } else if (e.key === 'ArrowUp') {
+    if (historyIndex > 0) {
+      historyIndex--;
+      input.value = commandHistory[historyIndex] || '';
+    }
+    e.preventDefault();
+  } else if (e.key === 'ArrowDown') {
+    if (historyIndex < commandHistory.length - 1) {
+      historyIndex++;
+      input.value = commandHistory[historyIndex] || '';
+    } else {
+      historyIndex = commandHistory.length;
+      input.value = '';
+    }
+    e.preventDefault();
+  }
+});
+
+async function handleCommand(inputText) {
+  if (!inputText.trim() || isTyping) return;
+
+  const command = inputText.trim().toLowerCase();
+
+  addLine(`ShadowPulse > ${inputText}`, { isCommand: true });
+
+  commandHistory.push(inputText);
   historyIndex = commandHistory.length;
 
-  const command = input.toLowerCase();
+  // Stop live views before new command
+  hideLiveTrade();
+  hideMusic();
 
   switch (command) {
     case 'help':
-      await typeWriter('Commands: help, about, music, trade, clear, secret, time', document.createElement('div'));
-      addLine('Commands: help, about, music, trade, clear, secret, time', { isTyping: true });
+      addLine('Commands: help, about, music, trade, market, clear, secret, time', { isTyping: true });
       break;
     case 'about':
-      await typeWriter('Phantom X — trader, lyricist, ghost in the machine.', document.createElement('div'));
       addLine('Phantom X — trader, lyricist, ghost in the machine.', { isTyping: true });
       break;
     case 'music':
-      addLine('Latest vibe here: https://link-to-your-music.com', { isTyping: true });
+      showMusic();
       break;
     case 'trade':
-      addLine('Trading edge: silent precision, market shadows, wealth in whispers.', { isTyping: true });
+    case 'market':
+      await showLiveTrade();
       break;
     case 'clear':
       clearOutput();
@@ -92,30 +154,3 @@ async function handleCommand(input) {
       addLine(`Unknown command: ${command}`, { isTyping: true });
   }
 }
-
-commandInput.addEventListener('keydown', e => {
-  if (isTyping) {
-    e.preventDefault(); // block input while typing anim runs
-    return;
-  }
-  if (e.key === 'Enter' && commandInput.value.trim()) {
-    handleCommand(commandInput.value.trim());
-    commandInput.value = '';
-    e.preventDefault();
-  } else if (e.key === 'ArrowUp') {
-    if (historyIndex > 0) {
-      historyIndex--;
-      commandInput.value = commandHistory[historyIndex];
-    }
-    e.preventDefault();
-  } else if (e.key === 'ArrowDown') {
-    if (historyIndex < commandHistory.length - 1) {
-      historyIndex++;
-      commandInput.value = commandHistory[historyIndex];
-    } else {
-      historyIndex = commandHistory.length;
-      commandInput.value = '';
-    }
-    e.preventDefault();
-  }
-});
