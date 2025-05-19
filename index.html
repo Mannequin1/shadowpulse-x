@@ -5,14 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>WealthMind Trader Live</title>
   <style>
+    body {
+      background: #121212;
+      color: #eee;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
     #trading-dashboard {
-      padding: 20px; 
-      background: rgba(0,0,0,0.7); 
-      color: #eee; 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      max-width: 400px; 
-      margin: 20px auto; 
+      background: rgba(0,0,0,0.7);
+      padding: 20px;
       border-radius: 10px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 0 15px rgba(46, 204, 113, 0.6);
+    }
+    #trading-dashboard h2 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+    }
+    #trading-dashboard div {
+      margin-top: 10px;
+      font-size: 16px;
     }
     .signal {
       padding: 8px 12px;
@@ -22,15 +42,14 @@
       font-size: 14px;
       opacity: 0.85;
       transition: opacity 0.3s ease;
+      color: #fff;
     }
     .signal.buy {
       background-color: #2ecc71;
-      color: #fff;
       animation: pulse 1.8s infinite;
     }
     .signal.sell {
       background-color: #e74c3c;
-      color: #fff;
       animation: pulse 1.8s infinite;
     }
     @keyframes pulse {
@@ -41,12 +60,12 @@
 </head>
 <body>
   <div id="trading-dashboard">
-    <h2 style="text-align:center; margin-bottom:10px;">WealthMind Trader Live</h2>
+    <h2>WealthMind Trader Live</h2>
     <div>
       <strong>EUR/USD Price:</strong> <span id="price">Loading...</span>
     </div>
-    <div id="signals-container" style="margin-top:15px;">
-      <!-- Signals appear here -->
+    <div id="signals-container">
+      <!-- Signals will appear here -->
     </div>
   </div>
 
