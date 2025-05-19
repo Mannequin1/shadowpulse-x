@@ -1,300 +1,217 @@
-// ShadowPulse-X v3.1 WealthMind Trader Edition
+// ===== ShadowPulse-X WealthMind Trader script.js =====
 
 const output = document.getElementById('output');
-const input = document.getElementById('commandInput');
+const commandInput = document.getElementById('commandInput');
 const mediaPlayer = document.getElementById('mediaPlayer');
 const musicFrame = document.getElementById('musicFrame');
 const musicInfo = document.getElementById('musicInfo');
 
-let darkMode = false;
-let tradeJournal = [];
-let smartAlerts = false;
-let psychologyNotes = [];
-let sessionTimer = null;
-let sessionEndTime = null;
+const ALPHA_VANTAGE_API_KEY = "IEVJKCR4I16F8H8C";
 
-// Phantom quotes upgrade
-const phantomQuotes = [
-  "I’m stuck in the past, but I’m movin’ too fast.",
-  "Told her no love, now we both in the crash.",
-  "Energy is my language. I say less and feel more.",
-  "I am the prize. I am the peace. I am the pressure.",
-  "If it’s not flowing, I let it go. What’s meant for me, finds me.",
-];
+let sessionTimerInterval;
+let alertsEnabled = false;
 
-// Helper: print output
+// Utility print function with auto-scroll
 function print(text) {
   output.innerHTML += `<div>${text}</div>`;
-  output.scrollTop = output.scrollHeight;
+  output.scrollTo({ top: output.scrollHeight, behavior: 'smooth' });
 }
 
-// Dark mode toggle
-function toggleDark() {
-  darkMode = !darkMode;
-  document.body.classList.toggle('dark-mode', darkMode);
-  print(`Dark mode ${darkMode ? 'enabled' : 'disabled'}`);
+// Clear output helper
+function clearOutput() {
+  output.innerHTML = '';
 }
 
-// Random Phantom quote
-function showQuote() {
-  const q = phantomQuotes[Math.floor(Math.random() * phantomQuotes.length)];
-  print(`Phantom Quote: "${q}"`);
+// Show help commands
+function showHelp() {
+  print(`
+    <b>Available commands:</b><br>
+    help - Show this help menu<br>
+    clear - Clear output<br>
+    play [track] - Play Phantom X music track<br>
+    closemusic - Close music player<br>
+    quote [symbol] - Get real-time quote (e.g. quote EURUSD)<br>
+    riskcalc - Open risk calculator prompt<br>
+    startsession [minutes] - Start session countdown timer<br>
+    togglealerts - Toggle smart alerts on/off<br>
+    journal - Show trading psychology notes<br>
+  `);
 }
 
-// Trade calculator with risk sizing
-function calcRisk(accountSize, riskPercent, entry, stopLoss, takeProfit) {
-  accountSize = parseFloat(accountSize);
-  riskPercent = parseFloat(riskPercent);
-  entry = parseFloat(entry);
-  stopLoss = parseFloat(stopLoss);
-  takeProfit = parseFloat(takeProfit);
+// Play music embed (SoundCloud example)
+function playMusic(track = "phantom-x") {
+  // Example: Replace with your own SoundCloud or embed URL for tracks
+  const tracks = {
+    "phantom-x": "https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/123456789",
+    "carti": "https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/987654321",
+  };
+  let url = tracks[track.toLowerCase()] || tracks["phantom-x"];
 
-  if ([accountSize, riskPercent, entry, stopLoss, takeProfit].some(isNaN)) {
-    print("Usage: calcrisk [account] [risk%] [entry] [SL] [TP]");
-    return;
-  }
-
-  const riskAmount = accountSize * (riskPercent / 100);
-  const riskPips = Math.abs(entry - stopLoss);
-  if (riskPips === 0) {
-    print("Stop Loss can't be same as Entry.");
-    return;
-  }
-  const positionSize = riskAmount / riskPips;
-  const rewardPips = Math.abs(takeProfit - entry);
-  const rewardRiskRatio = (rewardPips / riskPips).toFixed(2);
-
-  print(`Risk Amount: $${riskAmount.toFixed(2)}`);
-  print(`Position Size: ${positionSize.toFixed(4)} lots`);
-  print(`Reward:Risk Ratio: ${rewardRiskRatio}:1`);
+  musicFrame.src = url + "&auto_play=true";
+  musicInfo.textContent = `Playing: ${track}`;
+  mediaPlayer.style.display = "flex";
 }
 
-// Add trade to journal
-function addTrade(note, result, rMultiple) {
-  if (!note) {
-    print("Usage: trade add [note] [result: win/loss] [R multiple]");
-    return;
-  }
-  result = result?.toLowerCase();
-  rMultiple = parseFloat(rMultiple) || 0;
-  tradeJournal.push({ note, result, rMultiple });
-  print(`Trade added: "${note}" | Result: ${result || 'N/A'} | R: ${rMultiple}`);
+// Close music player
+function closeMusic() {
+  mediaPlayer.style.display = "none";
+  musicFrame.src = '';
+  musicInfo.textContent = '';
 }
 
-// Show trade stats
-function showStats() {
-  if (tradeJournal.length === 0) {
-    print("No trades logged yet.");
-    return;
-  }
-  let wins = 0, losses = 0, totalR = 0, maxDrawdown = 0, runningR = 0;
+// Fetch real-time quote from Alpha Vantage
+async function getQuote(symbol) {
+  try {
+    print(`Fetching real-time data for: ${symbol} ...`);
+    const response = await fetch(`https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${symbol.slice(0,3)}&to_currency=${symbol.slice(3)}&apikey=${ALPHA_VANTAGE_API_KEY}`);
+    const data = await response.json();
 
-  for (const t of tradeJournal) {
-    if (t.result === 'win') {
-      wins++;
-      runningR += t.rMultiple;
-    } else if (t.result === 'loss') {
-      losses++;
-      runningR -= t.rMultiple;
-      if (runningR < maxDrawdown) maxDrawdown = runningR;
-    }
-    totalR += t.rMultiple;
-  }
-
-  const winRate = ((wins / tradeJournal.length) * 100).toFixed(2);
-  const avgR = (totalR / tradeJournal.length).toFixed(2);
-
-  print(`Trades: ${tradeJournal.length} | Wins: ${wins} | Losses: ${losses}`);
-  print(`Win Rate: ${winRate}%`);
-  print(`Average R: ${avgR}`);
-  print(`Max Drawdown: ${maxDrawdown.toFixed(2)}`);
-}
-
-// Log psychology note
-function addMood(note) {
-  if (!note) {
-    print("Usage: mood [your note]");
-    return;
-  }
-  psychologyNotes.push({ timestamp: Date.now(), note });
-  print(`Mood logged: "${note}"`);
-}
-
-// Show psychology notes
-function showMood() {
-  if (psychologyNotes.length === 0) {
-    print("No mood notes logged yet.");
-    return;
-  }
-  print("Psychology Notes:");
-  psychologyNotes.forEach((m, i) => {
-    const date = new Date(m.timestamp).toLocaleString();
-    print(`${i + 1}. [${date}] ${m.note}`);
-  });
-}
-
-// Start session countdown timer to next news (example set to 10 mins)
-function startSession() {
-  if (sessionTimer) {
-    print("Session timer already running.");
-    return;
-  }
-  sessionEndTime = Date.now() + 10 * 60 * 1000; // 10 minutes from now
-  print("Session timer started: 10 minutes to next news.");
-
-  sessionTimer = setInterval(() => {
-    const remaining = sessionEndTime - Date.now();
-    if (remaining <= 0) {
-      clearInterval(sessionTimer);
-      sessionTimer = null;
-      print("News time! Stay sharp.");
+    if(data["Realtime Currency Exchange Rate"]) {
+      const rateData = data["Realtime Currency Exchange Rate"];
+      print(`
+        Symbol: ${rateData["1. From_Currency Code"]}/${rateData["3. To_Currency Code"]}<br>
+        Exchange Rate: ${rateData["5. Exchange Rate"]}<br>
+        Last Refreshed: ${rateData["6. Last Refreshed"]}
+      `);
     } else {
-      const m = Math.floor(remaining / 60000);
-      const s = Math.floor((remaining % 60000) / 1000);
-      print(`Time remaining: ${m}m ${s}s`);
+      print(`No data found for symbol ${symbol}. Check your input.`);
     }
-  }, 5000);
-}
-
-// Stop session timer
-function stopSession() {
-  if (sessionTimer) {
-    clearInterval(sessionTimer);
-    sessionTimer = null;
-    print("Session timer stopped.");
-  } else {
-    print("No session timer running.");
+  } catch (err) {
+    print("Error fetching quote: " + err.message);
   }
 }
 
-// Placeholder multi-timeframe market structure zones
-function showStructure() {
-  print("Market Structure Zones:");
-  print("Daily S/R: 1.2100 - 1.2200");
-  print("4H S/R: 1.2150 - 1.2180");
-  print("1H S/R: 1.2170 - 1.2190");
-}
+// Risk Calculator prompt and logic
+function riskCalculator() {
+  const riskPercent = prompt("Enter risk percent per trade (e.g., 1 for 1%)");
+  const accountSize = prompt("Enter your account size (e.g., 1000)");
+  const stopLossPips = prompt("Enter your stop loss in pips (e.g., 20)");
 
-// Smart alert toggles (placeholder for actual alert logic)
-function toggleAlerts(onOff) {
-  if (onOff === 'on') {
-    smartAlerts = true;
-    print("Smart trade alerts ENABLED.");
-  } else if (onOff === 'off') {
-    smartAlerts = false;
-    print("Smart trade alerts DISABLED.");
-  } else {
-    print("Usage: alert on | alert off");
+  if (!riskPercent || !accountSize || !stopLossPips) {
+    print("Risk calculator cancelled or invalid input.");
+    return;
   }
+
+  const riskAmount = (parseFloat(riskPercent) / 100) * parseFloat(accountSize);
+  const pipValue = riskAmount / parseFloat(stopLossPips);
+
+  print(`Risk Amount: $${riskAmount.toFixed(2)}<br>Pip Value per Pip: $${pipValue.toFixed(2)}`);
 }
 
-// Existing features below (dark mode, music, quotes, calculator, journal)...
+// Start a countdown session timer in minutes
+function startSessionTimer(minutes) {
+  clearInterval(sessionTimerInterval);
 
-// Command handler
+  let timeLeft = parseInt(minutes) * 60;
+  if (isNaN(timeLeft) || timeLeft <= 0) {
+    print("Invalid session time.");
+    return;
+  }
+
+  print(`Session started: ${minutes} minute(s). Counting down...`);
+  const timerId = setInterval(() => {
+    let mins = Math.floor(timeLeft / 60);
+    let secs = timeLeft % 60;
+    output.innerHTML = output.innerHTML.replace(/Session Timer:.*<br>/, '');
+    print(`Session Timer: ${mins}:${secs < 10 ? '0' + secs : secs}<br>`);
+    timeLeft--;
+
+    if (timeLeft < 0) {
+      clearInterval(timerId);
+      print("Session ended.");
+    }
+  }, 1000);
+
+  sessionTimerInterval = timerId;
+}
+
+// Toggle smart alerts placeholder
+function toggleAlerts() {
+  alertsEnabled = !alertsEnabled;
+  print(`Smart alerts are now <b>${alertsEnabled ? 'ENABLED' : 'DISABLED'}</b>.`);
+}
+
+// Show trading psychology journal notes
+function showJournal() {
+  print(`
+    <b>Trading Psychology Notes:</b><br>
+    - Move with intention, not reaction.<br>
+    - No rush, no chase, only attract.<br>
+    - Speak less, feel more.<br>
+    - You are the prize and the peace.<br>
+    - Let go of what doesn't flow.<br>
+    <i>(Phantom X Confidence Code)</i>
+  `);
+}
+
+// Command parser and handler
 function handleCommand(cmd) {
-  const parts = cmd.trim().split(' ');
-  const base = parts[0].toLowerCase();
+  const args = cmd.trim().split(' ');
+  const base = args[0].toLowerCase();
 
-  switch (base) {
+  switch(base) {
     case 'help':
-      print("Commands:");
-      print("help - show this");
-      print("dark - toggle dark mode");
-      print("quote - random Phantom quote");
-      print("calcrisk [account] [risk%] [entry] [SL] [TP] - trade calculator");
-      print("trade add [note] [result: win/loss] [R multiple] - add trade");
-      print("stats - show trade journal stats");
-      print("mood [note] - log psychology note");
-      print("mood show - show psychology notes");
-      print("session start - start news countdown (10m)");
-      print("session stop - stop countdown");
-      print("structure - show market structure zones");
-      print("alert on|off - toggle smart trade alerts");
-      print("music - play Phantom track");
+      clearOutput();
+      showHelp();
       break;
 
-    case 'dark':
-      toggleDark();
+    case 'clear':
+      clearOutput();
+      break;
+
+    case 'play':
+      if(args[1]) playMusic(args[1]);
+      else playMusic();
+      break;
+
+    case 'closemusic':
+      closeMusic();
       break;
 
     case 'quote':
-      showQuote();
+      if(args[1]) getQuote(args[1].toUpperCase());
+      else print("Usage: quote [symbol], e.g. quote EURUSD");
       break;
 
-    case 'calcrisk':
-      calcRisk(parts[1], parts[2], parts[3], parts[4], parts[5]);
+    case 'riskcalc':
+      riskCalculator();
       break;
 
-    case 'trade':
-      if (parts[1] === 'add') {
-        const note = parts.slice(2, parts.length - 2).join(' ');
-        const result = parts[parts.length - 2];
-        const r = parts[parts.length - 1];
-        addTrade(note, result, r);
-      } else {
-        print("Usage: trade add [note] [result: win/loss] [R multiple]");
-      }
+    case 'startsession':
+      if(args[1]) startSessionTimer(args[1]);
+      else print("Usage: startsession [minutes]");
       break;
 
-    case 'stats':
-      showStats();
+    case 'togglealerts':
+      toggleAlerts();
       break;
 
-    case 'mood':
-      if (parts[1] === 'show') {
-        showMood();
-      } else {
-        const moodNote = parts.slice(1).join(' ');
-        addMood(moodNote);
-      }
-      break;
-
-    case 'session':
-      if (parts[1] === 'start') {
-        startSession();
-      } else if (parts[1] === 'stop') {
-        stopSession();
-      } else {
-        print("Usage: session start | session stop");
-      }
-      break;
-
-    case 'structure':
-      showStructure();
-      break;
-
-    case 'alert':
-      toggleAlerts(parts[1]);
-      break;
-
-    case 'music':
-      playMusic();
+    case 'journal':
+      showJournal();
       break;
 
     default:
-      print(`Unknown command: ${cmd}`);
-      break;
+      print(`Unknown command: ${cmd}. Type 'help' for commands.`);
   }
 }
 
-// Music embed and play
-function playMusic() {
-  // Replace this with your actual Phantom X SoundCloud or Spotify embed link
-  const url = "https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/123456789&auto_play=true";
-  musicFrame.src = url;
-  musicInfo.textContent = "Playing Phantom X track...";
-  mediaPlayer.style.display = 'block';
-}
-
-// Handle input enter key
-input.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    const command = input.value;
-    print(`> ${command}`);
-    handleCommand(command);
-    input.value = '';
+// Event listener for command input
+commandInput.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter') {
+    const val = commandInput.value.trim();
+    if(val) {
+      print(`> ${val}`);
+      handleCommand(val);
+      commandInput.value = '';
+    }
   }
 });
 
-// Initial welcome message
-print("ShadowPulse-X v3.1 WealthMind Trader Edition ready. Type 'help' for commands.");
+// Close music button handler
+document.getElementById('closeMusicBtn').addEventListener('click', () => {
+  closeMusic();
+});
+
+// On load welcome message
+print("Welcome to ShadowPulse-X WealthMind Trader.");
+print("Type 'help' for available commands.");
