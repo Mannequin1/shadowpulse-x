@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pricing Plans</title>
+  <style>
+    body {
+      background: #121212;
+      color: #eee;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    #pricing {
+      padding: 60px 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    #pricing h2 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 40px;
+    }
+    .plans {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+    }
+    .plan {
+      background: #1f1f1f;
+      border-radius: 12px;
+      padding: 30px;
+      flex: 1 1 280px;
+      max-width: 320px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      color: #eee;
+      position: relative;
+    }
+    .plan.pro {
+      background: linear-gradient(135deg, #9f5fff, #4f00ff);
+      color: #fff;
+      box-shadow: 0 0 25px rgba(159, 95, 255, 0.7);
+    }
+    .plan.pro .badge {
+      position: absolute;
+      top: -12px;
+      right: -12px;
+      background: #ff4081;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .plan h3 {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+    }
+    .price {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 25px;
+    }
+    .price span {
+      font-weight: 400;
+      font-size: 1rem;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 30px;
+      flex-grow: 1;
+    }
+    li {
+      margin-bottom: 12px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .plan.free button {
+      background: #4caf50;
+      color: #121212;
+    }
+    .plan.pro button {
+      background: #fff;
+      color: #4f00ff;
+      font-weight: 700;
+    }
+    .plan.elite button {
+      background: #4caf50;
+      color: #121212;
+    }
+    button:hover {
+      opacity: 0.85;
+    }
+  </style>
+</head>
+<body>
+
+  <section id="pricing">
+    <h2>Choose Your Plan</h2>
+    <div class="plans">
+      
+      <div class="plan free">
+        <h3>Free</h3>
+        <p class="price">$0 <span>/ month</span></p>
+        <ul>
+          <li>Basic signals</li>
+          <li>Access to live dashboard</li>
+          <li>Community chat access</li>
+        </ul>
+        <button>Get Started</button>
+      </div>
+      
+      <div class="plan pro">
+        <div class="badge">Popular</div>
+        <h3>Pro</h3>
+        <p class="price">$49 <span>/ month</span></p>
+        <ul>
+          <li>All basic features</li>
+          <li>Real-time sniper signals</li>
+          <li>Priority alerts & notifications</li>
+          <li>Exclusive market analysis</li>
+          <li>Access to premium education</li>
+        </ul>
+        <button>Upgrade Now</button>
+      </div>
+
+      <div class="plan elite">
+        <h3>Elite</h3>
+        <p class="price">$99 <span>/ month</span></p>
+        <ul>
+          <li>All Pro features</li>
+          <li>1-on-1 coaching & mentorship</li>
+          <li>Exclusive trade setups</li>
+          <li>Early access to app features</li>
+          <li>VIP community access</li>
+        </ul>
+        <button>Join Elite</button>
+      </div>
+
+    </div>
+  </section>
+
+</body>
+</html>
