@@ -1,311 +1,300 @@
+// ShadowPulse-X v3.1 WealthMind Trader Edition
+
 const output = document.getElementById('output');
 const input = document.getElementById('commandInput');
 const mediaPlayer = document.getElementById('mediaPlayer');
 const musicFrame = document.getElementById('musicFrame');
 const musicInfo = document.getElementById('musicInfo');
-const body = document.body;
 
-let commandHistory = [];
-let historyIndex = 0;
-let isTyping = false;
-
-const API_KEY = 'IEVJKCR4I16F8H8C'; // Your Alpha Vantage API key
-
-// === CONFIG ===
-const PAIRS = [
-  { from: 'EUR', to: 'USD', label: 'EUR/USD' },
-  { from: 'USD', to: 'JPY', label: 'USD/JPY' },
-  { from: 'BTC', to: 'USD', label: 'BTC/USD' }
-];
-
-const phantomQuotes = [
-  "Ghosts in the machine, silence speaks.",
-  "Phantom moves, shadows groove.",
-  "Vibes too cold, heart on ice.",
-  "Lost in time, found in rhythm.",
-  "No love, just codes and flows."
-];
-
-// Sound effects
-const sndEnter = new Audio('https://freesound.org/data/previews/522/522107_12364358-lq.mp3');
-const sndAlert = new Audio('https://freesound.org/data/previews/331/331912_3248244-lq.mp3');
-
-// Trade journal stored here (simple in-memory, no persistence)
+let darkMode = false;
 let tradeJournal = [];
+let smartAlerts = false;
+let psychologyNotes = [];
+let sessionTimer = null;
+let sessionEndTime = null;
 
-function addLine(text, { isTyping = false, isCommand = false } = {}) {
-  const line = document.createElement('div');
-  line.textContent = text;
-  if (isCommand) line.style.color = '#0ff';
-  output.appendChild(line);
+// Phantom quotes upgrade
+const phantomQuotes = [
+  "I’m stuck in the past, but I’m movin’ too fast.",
+  "Told her no love, now we both in the crash.",
+  "Energy is my language. I say less and feel more.",
+  "I am the prize. I am the peace. I am the pressure.",
+  "If it’s not flowing, I let it go. What’s meant for me, finds me.",
+];
+
+// Helper: print output
+function print(text) {
+  output.innerHTML += `<div>${text}</div>`;
   output.scrollTop = output.scrollHeight;
 }
 
-function clearOutput() {
-  output.innerHTML = '';
-}
-
-async function fetchPrice(from, to) {
-  try {
-    const url = `https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${from}&to_currency=${to}&apikey=${API_KEY}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    const rate = data['Realtime Currency Exchange Rate']['5. Exchange Rate'];
-    return parseFloat(rate).toFixed(5);
-  } catch {
-    return null;
-  }
-}
-
-// Multi-pair live price updater
-let liveInterval = null;
-async function showMultiLivePrices() {
-  clearInterval(liveInterval);
-  clearOutput();
-  mediaPlayer.style.display = 'none';
-
-  async function updateAllPrices() {
-    clearOutput();
-    for (const pair of PAIRS) {
-      const price = await fetchPrice(pair.from, pair.to);
-      if (price) {
-        addLine(`${pair.label}: ${price}`);
-      } else {
-        addLine(`${pair.label}: failed to fetch`);
-      }
-    }
-    addLine('Type "stop" to end live prices');
-  }
-
-  await updateAllPrices();
-  liveInterval = setInterval(updateAllPrices, 15000);
-}
-
-function stopLivePrices() {
-  clearInterval(liveInterval);
-}
-
-function playMusic() {
-  clearOutput();
-  stopLivePrices();
-  mediaPlayer.style.display = 'block';
-
-  // Replace with your track embed URL:
-  const musicURL = 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/123456789&auto_play=true';
-  musicFrame.src = musicURL;
-  musicInfo.textContent = 'Phantom X — New Rap Single (2025)';
-
-  addLine('Playing Phantom X latest track...');
-}
-
-function stopMusic() {
-  mediaPlayer.style.display = 'none';
-  musicFrame.src = '';
-  musicInfo.textContent = '';
-}
-
-function getCurrentDateTime() {
-  return new Date().toLocaleString();
-}
-
 // Dark mode toggle
-let darkMode = false;
-function toggleDarkMode() {
+function toggleDark() {
   darkMode = !darkMode;
-  if (darkMode) {
-    body.style.backgroundColor = '#000';
-    body.style.color = '#0ff';
-  } else {
-    body.style.backgroundColor = '#111';
-    body.style.color = '#eee';
+  document.body.classList.toggle('dark-mode', darkMode);
+  print(`Dark mode ${darkMode ? 'enabled' : 'disabled'}`);
+}
+
+// Random Phantom quote
+function showQuote() {
+  const q = phantomQuotes[Math.floor(Math.random() * phantomQuotes.length)];
+  print(`Phantom Quote: "${q}"`);
+}
+
+// Trade calculator with risk sizing
+function calcRisk(accountSize, riskPercent, entry, stopLoss, takeProfit) {
+  accountSize = parseFloat(accountSize);
+  riskPercent = parseFloat(riskPercent);
+  entry = parseFloat(entry);
+  stopLoss = parseFloat(stopLoss);
+  takeProfit = parseFloat(takeProfit);
+
+  if ([accountSize, riskPercent, entry, stopLoss, takeProfit].some(isNaN)) {
+    print("Usage: calcrisk [account] [risk%] [entry] [SL] [TP]");
+    return;
   }
-  addLine(`Dark mode ${darkMode ? 'enabled' : 'disabled'}`);
-}
 
-// Phantom quote generator
-function randomQuote() {
-  return phantomQuotes[Math.floor(Math.random() * phantomQuotes.length)];
-}
-
-// Countdown to next news event (example: 18 May 2025, 14:30 UTC)
-function showCountdown() {
-  clearOutput();
-  const targetDate = new Date(Date.UTC(2025, 4, 18, 14, 30, 0)); // May=4 since 0-based
-  function updateCountdown() {
-    const now = new Date();
-    let diff = (targetDate - now) / 1000;
-    if (diff < 0) {
-      addLine('News event started!');
-      clearInterval(countdownInterval);
-      return;
-    }
-    const h = Math.floor(diff / 3600);
-    diff -= h * 3600;
-    const m = Math.floor(diff / 60);
-    const s = Math.floor(diff % 60);
-    clearOutput();
-    addLine(`Countdown to EUR CPI: ${h}h ${m}m ${s}s`);
+  const riskAmount = accountSize * (riskPercent / 100);
+  const riskPips = Math.abs(entry - stopLoss);
+  if (riskPips === 0) {
+    print("Stop Loss can't be same as Entry.");
+    return;
   }
-  updateCountdown();
-  const countdownInterval = setInterval(updateCountdown, 1000);
+  const positionSize = riskAmount / riskPips;
+  const rewardPips = Math.abs(takeProfit - entry);
+  const rewardRiskRatio = (rewardPips / riskPips).toFixed(2);
+
+  print(`Risk Amount: $${riskAmount.toFixed(2)}`);
+  print(`Position Size: ${positionSize.toFixed(4)} lots`);
+  print(`Reward:Risk Ratio: ${rewardRiskRatio}:1`);
 }
 
-// Dynamic background based on hour (market hours vibe)
-function updateBackgroundByTime() {
-  const h = new Date().getUTCHours();
-  if (h >= 13 && h < 22) { // London/New York overlap approx 13-22 UTC
-    body.style.backgroundColor = '#001f3f'; // blue night
-  } else {
-    body.style.backgroundColor = '#111'; // dark default
+// Add trade to journal
+function addTrade(note, result, rMultiple) {
+  if (!note) {
+    print("Usage: trade add [note] [result: win/loss] [R multiple]");
+    return;
   }
+  result = result?.toLowerCase();
+  rMultiple = parseFloat(rMultiple) || 0;
+  tradeJournal.push({ note, result, rMultiple });
+  print(`Trade added: "${note}" | Result: ${result || 'N/A'} | R: ${rMultiple}`);
 }
 
-// Sound effect play
-function playSound(sound) {
-  sound.currentTime = 0;
-  sound.play();
-}
-
-// Trade journal commands
-function addTradeLog(entry) {
-  tradeJournal.push({ text: entry, time: new Date().toLocaleString() });
-  addLine(`Trade added: "${entry}"`);
-}
-
-function showTradeJournal() {
-  clearOutput();
-  addLine('--- Trade Journal ---');
+// Show trade stats
+function showStats() {
   if (tradeJournal.length === 0) {
-    addLine('No trades logged yet.');
-  } else {
-    tradeJournal.forEach((log, i) => {
-      addLine(`${i + 1}. [${log.time}] ${log.text}`);
-    });
-  }
-}
-
-// Mini embedded chart (TradingView widget iframe)
-function showMiniChart() {
-  clearOutput();
-  addLine('Loading mini chart...');
-  clearInterval(liveInterval);
-  stopMusic();
-  const widget = document.createElement('iframe');
-  widget.style.width = '100%';
-  widget.style.height = '400px';
-  widget.style.border = 'none';
-  widget.src = "https://s.tradingview.com/widgetembed/?symbol=FX:EURUSD&interval=15&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=f1f3f6&studies=[]&theme=dark&style=1&timezone=Etc/UTC&withdateranges=1&hideideas=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en&utm_source=shadowpulse-x&utm_medium=widget&utm_campaign=chart";
-  output.appendChild(widget);
-}
-
-// Simple trade calculator (risk/reward/position size)
-function tradeCalculator(args) {
-  // Expect: riskAmount entryPrice stopLoss targetPrice
-  if (args.length < 4) {
-    addLine('Usage: tradecalc <risk> <entry> <stop> <target>');
+    print("No trades logged yet.");
     return;
   }
-  const [risk, entry, stop, target] = args.map(parseFloat);
-  if ([risk, entry, stop, target].some(isNaN)) {
-    addLine('All values must be numbers.');
-    return;
-  }
-  const riskPerUnit = Math.abs(entry - stop);
-  const rewardPerUnit = Math.abs(target - entry);
-  if (riskPerUnit === 0) {
-    addLine('Entry and stop cannot be the same.');
-    return;
-  }
-  const positionSize = risk / riskPerUnit;
-  const rewardRiskRatio = rewardPerUnit / riskPerUnit;
+  let wins = 0, losses = 0, totalR = 0, maxDrawdown = 0, runningR = 0;
 
-  addLine(`Position Size: ${positionSize.toFixed(2)} units`);
-  addLine(`Reward/Risk Ratio: ${rewardRiskRatio.toFixed(2)}`);
-}
-
-input.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    playSound(sndEnter);
-    handleCommand(input.value.trim());
-    input.value = '';
-  } else if (e.key === 'ArrowUp') {
-    if (historyIndex > 0) {
-      historyIndex--;
-      input.value = commandHistory[historyIndex] || '';
+  for (const t of tradeJournal) {
+    if (t.result === 'win') {
+      wins++;
+      runningR += t.rMultiple;
+    } else if (t.result === 'loss') {
+      losses++;
+      runningR -= t.rMultiple;
+      if (runningR < maxDrawdown) maxDrawdown = runningR;
     }
-    e.preventDefault();
-  } else if (e.key === 'ArrowDown') {
-    if (historyIndex < commandHistory.length - 1) {
-      historyIndex++;
-      input.value = commandHistory[historyIndex] || '';
+    totalR += t.rMultiple;
+  }
+
+  const winRate = ((wins / tradeJournal.length) * 100).toFixed(2);
+  const avgR = (totalR / tradeJournal.length).toFixed(2);
+
+  print(`Trades: ${tradeJournal.length} | Wins: ${wins} | Losses: ${losses}`);
+  print(`Win Rate: ${winRate}%`);
+  print(`Average R: ${avgR}`);
+  print(`Max Drawdown: ${maxDrawdown.toFixed(2)}`);
+}
+
+// Log psychology note
+function addMood(note) {
+  if (!note) {
+    print("Usage: mood [your note]");
+    return;
+  }
+  psychologyNotes.push({ timestamp: Date.now(), note });
+  print(`Mood logged: "${note}"`);
+}
+
+// Show psychology notes
+function showMood() {
+  if (psychologyNotes.length === 0) {
+    print("No mood notes logged yet.");
+    return;
+  }
+  print("Psychology Notes:");
+  psychologyNotes.forEach((m, i) => {
+    const date = new Date(m.timestamp).toLocaleString();
+    print(`${i + 1}. [${date}] ${m.note}`);
+  });
+}
+
+// Start session countdown timer to next news (example set to 10 mins)
+function startSession() {
+  if (sessionTimer) {
+    print("Session timer already running.");
+    return;
+  }
+  sessionEndTime = Date.now() + 10 * 60 * 1000; // 10 minutes from now
+  print("Session timer started: 10 minutes to next news.");
+
+  sessionTimer = setInterval(() => {
+    const remaining = sessionEndTime - Date.now();
+    if (remaining <= 0) {
+      clearInterval(sessionTimer);
+      sessionTimer = null;
+      print("News time! Stay sharp.");
     } else {
-      historyIndex = commandHistory.length;
-      input.value = '';
+      const m = Math.floor(remaining / 60000);
+      const s = Math.floor((remaining % 60000) / 1000);
+      print(`Time remaining: ${m}m ${s}s`);
     }
-    e.preventDefault();
+  }, 5000);
+}
+
+// Stop session timer
+function stopSession() {
+  if (sessionTimer) {
+    clearInterval(sessionTimer);
+    sessionTimer = null;
+    print("Session timer stopped.");
+  } else {
+    print("No session timer running.");
   }
-});
+}
 
-async function handleCommand(inputText) {
-  if (!inputText || isTyping) return;
+// Placeholder multi-timeframe market structure zones
+function showStructure() {
+  print("Market Structure Zones:");
+  print("Daily S/R: 1.2100 - 1.2200");
+  print("4H S/R: 1.2150 - 1.2180");
+  print("1H S/R: 1.2170 - 1.2190");
+}
 
-  addLine(`ShadowPulse > ${inputText}`, { isCommand: true });
-  commandHistory.push(inputText);
-  historyIndex = commandHistory.length;
+// Smart alert toggles (placeholder for actual alert logic)
+function toggleAlerts(onOff) {
+  if (onOff === 'on') {
+    smartAlerts = true;
+    print("Smart trade alerts ENABLED.");
+  } else if (onOff === 'off') {
+    smartAlerts = false;
+    print("Smart trade alerts DISABLED.");
+  } else {
+    print("Usage: alert on | alert off");
+  }
+}
 
-  const [cmd, ...args] = inputText.toLowerCase().split(' ');
+// Existing features below (dark mode, music, quotes, calculator, journal)...
 
-  // Reset views on new command
-  stopLivePrices();
-  stopMusic();
+// Command handler
+function handleCommand(cmd) {
+  const parts = cmd.trim().split(' ');
+  const base = parts[0].toLowerCase();
 
-  switch (cmd) {
+  switch (base) {
     case 'help':
-      addLine('Commands: help, about, music, trade, market, clear, secret, time, alert, stop, dark, quote, countdown, chart, tradecalc, journal, addtrade');
+      print("Commands:");
+      print("help - show this");
+      print("dark - toggle dark mode");
+      print("quote - random Phantom quote");
+      print("calcrisk [account] [risk%] [entry] [SL] [TP] - trade calculator");
+      print("trade add [note] [result: win/loss] [R multiple] - add trade");
+      print("stats - show trade journal stats");
+      print("mood [note] - log psychology note");
+      print("mood show - show psychology notes");
+      print("session start - start news countdown (10m)");
+      print("session stop - stop countdown");
+      print("structure - show market structure zones");
+      print("alert on|off - toggle smart trade alerts");
+      print("music - play Phantom track");
       break;
-    case 'about':
-      addLine('Phantom X — trader, lyricist, ghost in the machine.');
+
+    case 'dark':
+      toggleDark();
       break;
+
+    case 'quote':
+      showQuote();
+      break;
+
+    case 'calcrisk':
+      calcRisk(parts[1], parts[2], parts[3], parts[4], parts[5]);
+      break;
+
+    case 'trade':
+      if (parts[1] === 'add') {
+        const note = parts.slice(2, parts.length - 2).join(' ');
+        const result = parts[parts.length - 2];
+        const r = parts[parts.length - 1];
+        addTrade(note, result, r);
+      } else {
+        print("Usage: trade add [note] [result: win/loss] [R multiple]");
+      }
+      break;
+
+    case 'stats':
+      showStats();
+      break;
+
+    case 'mood':
+      if (parts[1] === 'show') {
+        showMood();
+      } else {
+        const moodNote = parts.slice(1).join(' ');
+        addMood(moodNote);
+      }
+      break;
+
+    case 'session':
+      if (parts[1] === 'start') {
+        startSession();
+      } else if (parts[1] === 'stop') {
+        stopSession();
+      } else {
+        print("Usage: session start | session stop");
+      }
+      break;
+
+    case 'structure':
+      showStructure();
+      break;
+
+    case 'alert':
+      toggleAlerts(parts[1]);
+      break;
+
     case 'music':
       playMusic();
       break;
-    case 'trade':
-    case 'market':
-      await showMultiLivePrices();
+
+    default:
+      print(`Unknown command: ${cmd}`);
       break;
-    case 'stop':
-      stopLivePrices();
-      stopMusic();
-      addLine('Stopped all live feeds.');
-      break;
-    case 'clear':
-      clearOutput();
-      break;
-    case 'secret':
-      addLine('You found the shadow pulse. Keep it locked.');
-      break;
-    case 'time':
-      addLine('Current time: ' + getCurrentDateTime());
-      break;
-    case 'dark':
-      toggleDarkMode();
-      break;
-    case 'quote':
-      addLine(randomQuote());
-      break;
-    case 'countdown':
-      showCountdown();
-      break;
-    case 'chart':
-      showMiniChart();
-      break;
-    case 'tradecalc':
-      tradeCalculator(args);
-      break;
-    case 'journal':
-      showTradeJournal();
-      break;
-    case 'addtrade':
-      if (args.length === 0) {
-        addLine('Usage: addtrade <trade description>');
-      }
+  }
+}
+
+// Music embed and play
+function playMusic() {
+  // Replace this with your actual Phantom X SoundCloud or Spotify embed link
+  const url = "https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/123456789&auto_play=true";
+  musicFrame.src = url;
+  musicInfo.textContent = "Playing Phantom X track...";
+  mediaPlayer.style.display = 'block';
+}
+
+// Handle input enter key
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const command = input.value;
+    print(`> ${command}`);
+    handleCommand(command);
+    input.value = '';
+  }
+});
+
+// Initial welcome message
+print("ShadowPulse-X v3.1 WealthMind Trader Edition ready. Type 'help' for commands.");
