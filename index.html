@@ -2,73 +2,109 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WealthMind Trader Live</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ShadowPulse X – Phantom Signals</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
   <style>
     body {
-      background: #121212;
-      color: #eee;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0d0d0d;
+      color: #e0e0e0;
+      font-family: 'Share Tech Mono', monospace;
       margin: 0;
       padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
     }
-    #trading-dashboard {
-      background: rgba(0,0,0,0.7);
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 400px;
-      width: 90%;
-      box-shadow: 0 0 15px rgba(46, 204, 113, 0.6);
-    }
-    #trading-dashboard h2 {
+
+    header {
+      padding: 2rem;
       text-align: center;
-      margin-bottom: 10px;
-      font-weight: 700;
-      letter-spacing: 1.2px;
+      background: linear-gradient(to right, #121212, #1a1a1a);
+      border-bottom: 1px solid #333;
     }
-    #trading-dashboard div {
-      margin-top: 10px;
-      font-size: 16px;
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: #ffffff;
     }
-    .signal {
-      padding: 8px 12px;
-      margin: 6px 0;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 14px;
-      opacity: 0.85;
-      transition: opacity 0.3s ease;
+
+    p {
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      padding: 2rem;
+    }
+
+    .signal-card {
+      background-color: #161616;
+      border: 1px solid #333;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255, 0, 100, 0.1);
+      transition: transform 0.2s ease;
+    }
+
+    .signal-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 20px rgba(255, 0, 100, 0.3);
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      margin-bottom: 0.5rem;
       color: #fff;
     }
-    .signal.buy {
-      background-color: #2ecc71;
-      animation: pulse 1.8s infinite;
-    }
-    .signal.sell {
-      background-color: #e74c3c;
-      animation: pulse 1.8s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% {opacity: 0.85;}
-      50% {opacity: 1;}
-    }
+
+    .buy { background-color: #00c896; }
+    .sell { background-color: #ff3c3c; }
+    .confidence-high { background-color: #d100ff; }
+    .confidence-medium { background-color: #ff9f00; }
+    .confidence-low { background-color: #007bff; }
   </style>
 </head>
 <body>
-  <div id="trading-dashboard">
-    <h2>WealthMind Trader Live</h2>
-    <div>
-      <strong>EUR/USD Price:</strong> <span id="price">Loading...</span>
-    </div>
-    <div id="signals-container">
-      <!-- Signals will appear here -->
-    </div>
-  </div>
+  <header>
+    <h1>SHADOWPULSE-X // SIGNAL DASHBOARD</h1>
+    <p>Encrypted Drops – Phantom Frequency</p>
+  </header>
 
-  <script src="script.js"></script>
+  <main class="dashboard" id="signalDashboard">
+    <!-- Signal cards will appear here -->
+  </main>
+
+  <script>
+    async function loadSignals() {
+      const res = await fetch('signals.json');
+      const signals = await res.json();
+      const container = document.getElementById('signalDashboard');
+
+      signals.forEach(signal => {
+        const card = document.createElement('div');
+        card.className = 'signal-card';
+
+        card.innerHTML = `
+          <div class="tag ${signal.direction.toLowerCase()}">${signal.direction}</div>
+          <h3>${signal.pair}</h3>
+          <p><strong>Entry:</strong> ${signal.entry}</p>
+          <p><strong>SL:</strong> ${signal.sl}</p>
+          <p><strong>TP:</strong> ${signal.tp}</p>
+          <div class="tag confidence-${signal.confidence.toLowerCase()}">${signal.confidence} Confidence</div>
+          <p><strong>Status:</strong> ${signal.status}</p>
+          <p><em>Dropped:</em> ${signal.timestamp}</p>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    loadSignals();
+  </script>
 </body>
 </html>
