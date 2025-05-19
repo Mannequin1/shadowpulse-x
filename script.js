@@ -8,7 +8,7 @@ let commandHistory = [];
 let historyIndex = 0;
 let isTyping = false;
 
-const API_KEY = 'YOUR_ALPHA_VANTAGE_API_KEY'; // Replace with your key
+const API_KEY = 'IEVJKCR4I16F8H8C'; // Your Alpha Vantage API key
 const STOCK_SYMBOL = 'EURUSD'; // Example forex pair
 
 function addLine(text, { isTyping = false, isCommand = false } = {}) {
@@ -83,12 +83,6 @@ function hideMusic() {
 function getCurrentDateTime() {
   const now = new Date();
   return now.toLocaleString();
-}
-
-function playSound(audio) {
-  if (!audio) return;
-  audio.currentTime = 0;
-  audio.play();
 }
 
 input.addEventListener('keydown', (e) => {
