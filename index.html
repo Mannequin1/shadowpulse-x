@@ -137,32 +137,37 @@
 
   <script>
     async function loadSignals() {
-      const res = await fetch('signals.json');
-      const signals = await res.json();
-      const container = document.getElementById('signalDashboard');
+      try {
+        const res = await fetch('signals.json', {cache: "no-store"});
+        if (!res.ok) throw new Error('Failed to fetch signals');
+        const signals = await res.json();
+        const container = document.getElementById('signalDashboard');
+        container.innerHTML = ''; // Clear old signals
 
-      signals.forEach(signal => {
-        const card = document.createElement('div');
-        card.className = 'signal-card';
+        signals.forEach(signal => {
+          const card = document.createElement('div');
+          card.className = 'signal-card';
 
-        card.innerHTML = `
-          <div class="tag ${signal.direction.toLowerCase()}">${signal.direction}</div>
-          <h3>${signal.pair}</h3>
-          <p><strong>Entry:</strong> ${signal.entry}</p>
-          <p><strong>SL:</strong> ${signal.sl}</p>
-          <p><strong>TP:</strong> ${signal.tp}</p>
-          <div class="tag confidence-${signal.confidence.toLowerCase()}">${signal.confidence} Confidence</div>
-          <p><strong>Status:</strong> ${signal.status}</p>
-          <p><em>Dropped:</em> ${signal.timestamp}</p>
-        `;
+          card.innerHTML = `
+            <div class="tag ${signal.direction.toLowerCase()}">${signal.direction}</div>
+            <h3>${signal.pair}</h3>
+            <p><strong>Entry:</strong> ${signal.entry}</p>
+            <p><strong>SL:</strong> ${signal.sl}</p>
+            <p><strong>TP:</strong> ${signal.tp}</p>
+            <div class="tag confidence-${signal.confidence.toLowerCase()}">${signal.confidence} Confidence</div>
+            <p><strong>Status:</strong> ${signal.status}</p>
+            <p><em>Dropped:</em> ${signal.timestamp}</p>
+          `;
 
-        container.appendChild(card);
-      });
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error('Error loading signals:', error);
+      }
     }
 
     // Show dashboard after loader animation
     window.addEventListener('load', () => {
-      // Wait 2.5s to match loader fade out
       setTimeout(() => {
         const loader = document.getElementById('loader');
         loader.style.display = 'none';
@@ -170,8 +175,10 @@
         const dashboard = document.getElementById('dashboardContainer');
         dashboard.classList.add('visible');
 
-        // Load signals after showing dashboard
         loadSignals();
+
+        // Refresh signals every 30 seconds
+        setInterval(loadSignals, 30000);
       }, 2500);
     });
   </script>
