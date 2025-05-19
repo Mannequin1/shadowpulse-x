@@ -1,4 +1,4 @@
-const alphaVantageKey = "IEVJKCR4I16F8H8C";  // Your API key here
+const alphaVantageKey = "IEVJKCR4I16F8H8C";  // Your API key
 const priceElement = document.getElementById("price");
 const signalsContainer = document.getElementById("signals-container");
 
@@ -13,16 +13,24 @@ async function fetchPrice() {
     const url = `https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=EUR&to_currency=USD&apikey=${alphaVantageKey}`;
     const response = await fetch(url);
     const data = await response.json();
-    const price = parseFloat(data["Realtime Currency Exchange Rate"]["5. Exchange Rate"]);
-    priceElement.textContent = price.toFixed(5);
-    checkAlerts(price);
+
+    const exchangeData = data["Realtime Currency Exchange Rate"];
+    if (exchangeData && exchangeData["5. Exchange Rate"]) {
+      const price = parseFloat(exchangeData["5. Exchange Rate"]);
+      priceElement.textContent = price.toFixed(5);
+      checkAlerts(price);
+    } else {
+      priceElement.textContent = "Unavailable";
+      console.error("Invalid API response:", data);
+    }
+
   } catch (error) {
     console.error("Error fetching price:", error);
     priceElement.textContent = "Error";
   }
 }
 
-// Check price vs alert levels and notify
+// Check alert levels
 function checkAlerts(currentPrice) {
   alertLevels.forEach(level => {
     if (!level.triggered) {
@@ -36,7 +44,7 @@ function checkAlerts(currentPrice) {
   });
 }
 
-// Mock fetch for WealthMind Trader signals — replace with your real API later
+// Fetch mock signals — replace with real API later
 async function fetchTraderSignals() {
   try {
     const mockSignals = [
@@ -49,7 +57,7 @@ async function fetchTraderSignals() {
   }
 }
 
-// Render signals in the container
+// Display signals
 function displaySignals(signals) {
   signalsContainer.innerHTML = "";
   signals.forEach(signal => {
@@ -60,7 +68,7 @@ function displaySignals(signals) {
   });
 }
 
-// Request notification permission and send notification
+// Push notifications
 if ("Notification" in window) {
   Notification.requestPermission();
 }
@@ -71,9 +79,10 @@ function sendPushNotification(message) {
   }
 }
 
-// Initial load and intervals
+// Run functions
 fetchPrice();
 fetchTraderSignals();
 
-setInterval(fetchPrice, 15000);         // update price every 15 seconds
-setInterval(fetchTraderSignals, 60000); // update signals every 60 seconds
+// Set safer intervals (1 min each)
+setInterval(fetchPrice, 60000);
+setInterval(fetchTraderSignals, 60000);
