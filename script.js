@@ -31,7 +31,7 @@ async function fetchPrice() {
   }
 }
 
-// Check price vs alert levels and notify
+// Check price against alert levels and notify once per level
 function checkAlerts(currentPrice) {
   alertLevels.forEach(level => {
     if (!level.triggered) {
@@ -72,7 +72,7 @@ function displaySignals(signals) {
 }
 
 // Request notification permission on page load
-if ("Notification" in window) {
+if ("Notification" in window && Notification.permission !== "granted") {
   Notification.requestPermission();
 }
 
